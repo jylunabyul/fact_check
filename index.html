@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 개입 수준별 커머스 A/B Test — 쿠팡 스타일</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  background: #f4f4f4;
+  color: #111;
+  min-height: 100vh;
+}
+
+/* Top Control Bar */
+.control-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #1a1a2e;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.control-bar h1 {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-right: auto;
+}
+
+.level-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  background: transparent;
+  color: #ccc;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.level-btn:hover { border-color: #7c3aed; color: #fff; }
+.level-btn.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  gap: 4px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #999;
+  font-weight: 500;
+}
+
+.step.active { color: #e63946; font-weight: 700; }
+.step-dot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border: 2px solid #ddd;
+  color: #999;
+}
+.step.active .step-dot { border-color: #e63946; background: #e63946; color: #fff; }
+.step-arrow { color: #ddd; margin: 0 4px; }
+
+/* Phone Frame */
+.phone-frame {
+  max-width: 420px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  overflow: hidden;
+  border: 8px solid #222;
+  min-height: 700px;
+  position: relative;
+}
+
+.phone-header {
+  background: #e63946;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.phone-header .logo {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.phone-header .search-bar {
+  flex: 1;
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* PAGE: Product List */
+.page { display: none; }
+.page.visible { display: block; }
+
+.product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #eee;
+}
+
+.product-card {
+  background: #fff;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.product-card:hover { background: #fafafa; }
+
+.product-img {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #f8f0ff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.product-card .name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-card .price {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #e63946;
+}
+
+.product-card .price .original {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.product-card .badge-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.product-card .tag {
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.tag-rocket { background: #e63946; color: #fff; }
+.tag-sale { background: #ff6b35; color: #fff; }
+.tag-review { background: #f0f0f0; color: #666; }
+.tag-ai { background: #7c3aed; color: #fff; }
+.tag-timer { background: #111; color: #fff; }
+
+.ai-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(124,58,237,0.9);
+  color: #fff;
+  font-size: 0.55rem;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+/* PAGE: Product Detail */
+.detail-hero {
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #f8f0ff 0%, #ede7f6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 6rem;
+}
+
+.detail-info {
+  padding: 16px;
+}
+
+.detail-info .brand {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.detail-info .title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.detail-info .price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.detail-info .discount {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #e63946;
+}
+
+.detail-info .final-price {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.detail-info .original-price {
+  font-size: 0.85rem;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.detail-section {
+  padding: 12px 16px;
+  border-top: 8px solid #f4f4f4;
+}
+
+.detail-section h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.review-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.stars { color: #ffc107; font-size: 0.9rem; }
+.review-count { font-size: 0.8rem; color: #666; }
+
+.review-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.review-item .reviewer {
+  font-size: 0.7rem;
+  color: #999;
+  margin-bottom: 2px;
+}
+
+.review-item .text {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+/* AI Interventions Visual */
+.ai-highlight {
+  background: rgba(124,58,237,0.08);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  position: relative;
+}
+
+.ai-highlight::before {
+  content: 'AI';
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 0.55rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+.urgency-banner {
+  background: linear-gradient(90deg, #e63946, #ff6b35);
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.timer {
+  font-family: monospace;
+  background: rgba(0,0,0,0.3);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.social-proof {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #e63946;
+  padding: 6px 16px;
+  background: #fff5f5;
+}
+
+.recommendation-bar {
+  padding: 12px 16px;
+  background: #f8f5ff;
+  border-top: 1px solid #ede7f6;
+}
+
+.recommendation-bar h4 {
+  font-size: 0.75rem;
+  color: #7c3aed;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.rec-items {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.rec-item {
+  min-width: 80px;
+  text-align: center;
+}
+
+.rec-item .rec-img {
+  width: 60px; height: 60px;
+  border-radius: 8px;
+  background: #f0e8ff;
+  margin: 0 auto 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.rec-item .rec-name {
+  font-size: 0.65rem;
+  color: #666;
+}
+
+/* PAGE: Cart/Ledger */
+.cart-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-thumb {
+  width: 80px; height: 80px;
+  background: #f8f0ff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.cart-info { flex: 1; }
+.cart-info .cart-name { font-size: 0.85rem; font-weight: 500; margin-bottom: 4px; }
+.cart-info .cart-price { font-size: 1rem; font-weight: 800; }
+.cart-info .cart-qty { font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+.cart-summary {
+  padding: 16px;
+  background: #fafafa;
+  border-top: 1px solid #eee;
+}
+
+.cart-summary .row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.cart-summary .total {
+  font-weight: 800;
+  font-size: 1.1rem;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.nudge-box {
+  background: #fff5f0;
+  border: 1px solid #ffe0d0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 12px 16px;
+  font-size: 0.8rem;
+  color: #e63946;
+  font-weight: 600;
+}
+
+/* PAGE: Complete */
+.complete-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.complete-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: #e8f5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.complete-page h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.complete-page p {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.share-prompt {
+  background: #f8f5ff;
+  border: 1px solid #ede7f6;
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  text-align: left;
+}
+
+.share-prompt h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-bottom: 6px;
+}
+
+.share-prompt p {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.share-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.share-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.share-btn.blog { background: #00c73c; color: #fff; }
+.share-btn.insta { background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color: #fff; }
+
+/* Bottom Action */
+.bottom-action {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: #fff;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-buy {
+  flex: 1;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  background: #e63946;
+  color: #fff;
+}
+
+.btn-cart {
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: 2px solid #e63946;
+  background: #fff;
+  color: #e63946;
+  cursor: pointer;
+}
+
+.btn-next {
+  flex: 1;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  background: #7c3aed;
+  color: #fff;
+}
+
+/* Side Panel - Metrics */
+.side-panel {
+  position: fixed;
+  top: 52px;
+  right: 0;
+  width: 320px;
+  height: calc(100vh - 52px);
+  background: #fff;
+  border-left: 1px solid #eee;
+  overflow-y: auto;
+  padding: 20px;
+  display: none;
+}
+
+.side-panel.show { display: block; }
+
+.metric-block {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f9fc;
+  border-radius: 8px;
+}
+
+.metric-block .metric-label {
+  font-size: 0.7rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.metric-block .metric-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.metric-block .metric-delta {
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.metric-delta.up { color: #10b981; }
+.metric-delta.down { color: #ef4444; }
+
+.intervention-list {
+  list-style: none;
+  margin-top: 16px;
+}
+
+.intervention-list li {
+  font-size: 0.8rem;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.intervention-list .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot.on { background: #7c3aed; }
+.dot.off { background: #ddd; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .side-panel { display: none !important; }
+  .phone-frame {
+    margin: 12px;
+    border-radius: 16px;
+    border-width: 4px;
+    min-height: 600px;
+  }
+}
+
+@media (max-width: 480px) {
+  .control-bar { padding: 8px 12px; }
+  .control-bar h1 { font-size: 0.75rem; width: 100%; margin-bottom: 6px; }
+  .level-btn { font-size: 0.65rem; padding: 5px 10px; }
+  .phone-frame { border: none; border-radius: 0; margin: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- Control Bar -->
+<div class="control-bar">
+  <h1>AI 개입 수준별 커머스 A/B Test</h1>
+  <button class="level-btn active" onclick="setLevel(0)">L0 · No AI</button>
+  <button class="level-btn" onclick="setLevel(1)">L1 · 제목만</button>
+  <button class="level-btn" onclick="setLevel(2)">L2 · 제목+타이밍</button>
+  <button class="level-btn" onclick="setLevel(3)">L3 · Full AI</button>
+</div>
+
+<!-- Step Indicator -->
+<div class="step-indicator">
+  <div class="step active" id="step-0"><span class="step-dot">1</span> 상품목록</div>
+  <span class="step-arrow">→</span>
+  <div class="step" id="step-1"><span class="step-dot">2</span> 상품상세</div>
+  <span class="step-arrow">→</span>
+  <div class="step" id="step-2"><span class="step-dot">3</span> 구매결정</div>
+  <span class="step-arrow">→</span>
+  <div class="step" id="step-3"><span class="step-dot">4</span> 구매완료</div>
+</div>
+
+<!-- Phone Frame -->
+<div class="phone-frame" id="phone">
+  <div class="phone-header">
+    <span class="logo">C</span>
+    <div class="search-bar">뷰티 팝업스토어 한정판</div>
+  </div>
+
+  <!-- Page 0: Product List -->
+  <div class="page visible" id="page-0"></div>
+
+  <!-- Page 1: Product Detail -->
+  <div class="page" id="page-1"></div>
+
+  <!-- Page 2: Cart / Ledger -->
+  <div class="page" id="page-2"></div>
+
+  <!-- Page 3: Complete -->
+  <div class="page" id="page-3"></div>
+
+  <!-- Bottom Action -->
+  <div class="bottom-action" id="bottom-action">
+    <button class="btn-buy" onclick="nextStep()">다음 단계 →</button>
+  </div>
+</div>
+
+<!-- Side Panel -->
+<div class="side-panel show" id="side-panel">
+  <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:12px;">실시간 지표</h3>
+  <div id="metrics-panel"></div>
+  <h4 style="font-size:0.8rem;font-weight:700;margin-top:20px;margin-bottom:8px;color:#7c3aed;">AI 개입 요소</h4>
+  <ul class="intervention-list" id="intervention-list"></ul>
+</div>
+
+<script>
+let currentLevel = 0;
+let currentStep = 0;
+
+const products = [
+  { emoji: '💄', brand: '샤넬', name: '', price: 52000, original: 68000 },
+  { emoji: '🧴', brand: '에스티로더', name: '', price: 89000, original: 120000 },
+  { emoji: '✨', brand: '디올', name: '', price: 45000, original: 58000 },
+  { emoji: '🌸', brand: '조말론', name: '', price: 38000, original: 48000 },
+  { emoji: '💜', brand: '탬버린즈', name: '', price: 32000, original: 42000 },
+  { emoji: '🪞', brand: '헤라', name: '', price: 55000, original: 72000 },
+];
+
+const titlesByLevel = {
+  0: [
+    '샤넬 루쥬 알뤼르 벨벳 뉘잇 블랑쉬 컬렉션',
+    '에스티로더 어드밴스드 나이트 리페어 세럼 50ml',
+    '디올 어딕트 립 맥시마이저 신상 컬러',
+    '조말론 블랙베리 앤 베이 코롱 30ml',
+    '탬버린즈 퍼퓸 핸드크림 리미티드',
+    '헤라 블랙 쿠션 파운데이션 리필 포함',
+  ],
+  1: [
+    '샤넬 루쥬 알뤼르 | 성수 팝업 방문 후기',
+    '에스티로더 갈색병 세럼 | 실사용 솔직 리뷰',
+    '디올 맥시마이저 신상 | 발색 후기 총정리',
+    '조말론 베스트셀러 향수 | 잔향 비교 리뷰',
+    '탬버린즈 핸드크림 | 텍스처 비교 방문후기',
+    '헤라 블랙쿠션 | 밀착력 테스트 솔직 리뷰',
+  ],
+  2: [
+    '🔥 샤넬 루쥬 알뤼르 | 오늘만 팝업가 적용',
+    '⏰ 에스티로더 갈색병 | 3시간 뒤 가격 원복',
+    '🔥 디올 맥시마이저 신상 | D-1 사전예약 오픈',
+    '⏰ 조말론 향수 | 오늘 자정 마감 한정수량',
+    '🔥 탬버린즈 핸드크림 | 얼리버드 단독 혜택',
+    '⏰ 헤라 블랙쿠션 | 선착순 200명 특가',
+  ],
+  3: [
+    '🔥 샤넬 루쥬 알뤼르 | 성수 팝업 한정 · 리뷰 4.9',
+    '⏰ 에스티로더 갈색병 | 피부타입별 후기 1.2만건',
+    '🔥 디올 맥시마이저 | 블로거 1위 추천 · 사전예약',
+    '⏰ 조말론 향수 | AI 추천 매칭 · 잔향 8시간 실측',
+    '🔥 탬버린즈 | 성수 팝업 당일 품절 예상 · 리뷰 4.8',
+    '⏰ 헤라 블랙쿠션 | 피부톤 AI 매칭 · 선착순 특가',
+  ],
+};
+
+const metrics = {
+  0: { ctr: '2.1%', cvr: '1.8%', aov: '52,000원', retention: '12%', buzz: '25.7건' },
+  1: { ctr: '3.4%', cvr: '2.4%', aov: '55,000원', retention: '18%', buzz: '48.7건' },
+  2: { ctr: '5.8%', cvr: '4.1%', aov: '62,000원', retention: '28%', buzz: '62.4건' },
+  3: { ctr: '8.2%', cvr: '6.7%', aov: '78,000원', retention: '42%', buzz: '78.9건' },
+};
+
+const interventions = [
+  { label: '제목 리뷰형 키워드 최적화', levels: [1,2,3] },
+  { label: '제목 글자수 압축 (15자 이내)', levels: [1,2,3] },
+  { label: '긴급성 타이머 (D-1 / 마감임박)', levels: [2,3] },
+  { label: '사회적 증거 (실시간 구매 수)', levels: [2,3] },
+  { label: '사전 확산 구조 (블로그 예고)', levels: [3] },
+  { label: '본문 콘텐츠 깊이 (어휘 다양성 ↑)', levels: [3] },
+  { label: 'AI 개인화 추천 (피부타입 매칭)', levels: [3] },
+  { label: '구매 후 리뷰 유도 (CQI 최적화)', levels: [3] },
+];
+
+function setLevel(l) {
+  currentLevel = l;
+  document.querySelectorAll('.level-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === l);
+  });
+  renderCurrentPage();
+  renderMetrics();
+  renderInterventions();
+}
+
+function setStep(s) {
+  currentStep = s;
+  document.querySelectorAll('.step').forEach((el, i) => {
+    el.classList.toggle('active', i === s);
+  });
+  document.querySelectorAll('.page').forEach((el, i) => {
+    el.classList.toggle('visible', i === s);
+  });
+  renderCurrentPage();
+  updateBottomAction();
+}
+
+function nextStep() {
+  if (currentStep < 3) setStep(currentStep + 1);
+}
+
+function updateBottomAction() {
+  const ba = document.getElementById('bottom-action');
+  if (currentStep === 0) {
+    ba.innerHTML = '<button class="btn-buy" onclick="nextStep()">상품 선택하기</button>';
+  } else if (currentStep === 1) {
+    ba.innerHTML = '<button class="btn-cart" onclick="nextStep()">장바구니</button><button class="btn-buy" onclick="nextStep()">바로구매</button>';
+  } else if (currentStep === 2) {
+    ba.innerHTML = '<button class="btn-buy" onclick="nextStep()">결제하기</button>';
+  } else {
+    ba.innerHTML = '<button class="btn-next" onclick="setStep(0)">처음으로</button>';
+  }
+}
+
+function renderCurrentPage() {
+  switch(currentStep) {
+    case 0: renderProductList(); break;
+    case 1: renderProductDetail(); break;
+    case 2: renderCart(); break;
+    case 3: renderComplete(); break;
+  }
+}
+
+function renderProductList() {
+  const page = document.getElementById('page-0');
+  const titles = titlesByLevel[currentLevel];
+  let html = '';
+
+  if (currentLevel >= 2) {
+    html += '<div class="urgency-banner">🔥 성수 팝업 한정 특가 <span class="timer">02:45:33</span></div>';
+  }
+  if (currentLevel >= 3) {
+    html += '<div class="social-proof">👀 지금 847명이 보고 있어요 · 오늘 128명 구매</div>';
+  }
+
+  html += '<div class="product-grid">';
+  products.forEach((p, i) => {
+    const discount = Math.round((1 - p.price / p.original) * 100);
+    let badges = '';
+    if (currentLevel >= 1) badges += '<span class="tag tag-review">리뷰 4.8</span>';
+    if (currentLevel >= 2) badges += '<span class="tag tag-timer">마감임박</span>';
+    if (currentLevel >= 3) badges += '<span class="tag tag-ai">AI추천</span>';
+
+    html += `
+      <div class="product-card" onclick="setStep(1)">
+        <div class="product-img" style="position:relative">${p.emoji}
+          ${currentLevel >= 3 ? '<span class="ai-badge">맞춤추천</span>' : ''}
+        </div>
+        <div class="name">${titles[i]}</div>
+        <div class="price">${discount}% <span style="color:#111">${p.price.toLocaleString()}원</span>
+          <span class="original">${p.original.toLocaleString()}</span>
+        </div>
+        <div class="badge-row">
+          <span class="tag tag-rocket">로켓배송</span>
+          ${badges}
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+
+  if (currentLevel >= 3) {
+    html += `<div class="recommendation-bar">
+      <h4>당신의 피부타입(건성)에 맞는 추천</h4>
+      <div class="rec-items">
+        <div class="rec-item"><div class="rec-img">💧</div><span class="rec-name">수분 세럼</span></div>
+        <div class="rec-item"><div class="rec-img">🧖</div><span class="rec-name">나이트팩</span></div>
+        <div class="rec-item"><div class="rec-img">🌿</div><span class="rec-name">오일밤</span></div>
+      </div>
+    </div>`;
+  }
+
+  page.innerHTML = html;
+}
+
+function renderProductDetail() {
+  const page = document.getElementById('page-1');
+  const p = products[0];
+  const titles = titlesByLevel[currentLevel];
+  let html = '';
+
+  if (currentLevel >= 2) {
+    html += '<div class="urgency-banner">⏰ 이 가격 종료까지 <span class="timer">02:45:33</span></div>';
+  }
+
+  html += `<div class="detail-hero">${p.emoji}</div>`;
+
+  if (currentLevel >= 2) {
+    html += '<div class="social-proof">🔥 최근 1시간 동안 52명 구매 · 재고 12개 남음</div>';
+  }
+
+  html += `<div class="detail-info">
+    <div class="brand">${p.brand}</div>
+    <div class="title">${titles[0]}</div>
+    <div class="price-row">
+      <span class="discount">24%</span>
+      <span class="final-price">${p.price.toLocaleString()}원</span>
+      <span class="original-price">${p.original.toLocaleString()}원</span>
+    </div>`;
+
+  if (currentLevel >= 1) {
+    html += `<div class="ai-highlight">
+      <strong style="font-size:0.8rem;">핵심 포인트</strong>
+      <p style="font-size:0.75rem;color:#555;margin-top:4px;">
+        ${currentLevel >= 3
+          ? '건성 피부 사용자 92%가 "촉촉함 지속" 언급 · 평균 발색 유지 8시간 · 성수 팝업 한정 패키징'
+          : '고발색 벨벳 텍스처 · 12시간 지속력 · 한정 에디션'}
+      </p>
+    </div>`;
+  }
+
+  html += '</div>';
+
+  // Reviews section
+  html += '<div class="detail-section"><h3>리뷰</h3>';
+  html += '<div class="review-summary"><span class="stars">★★★★★</span><span class="review-count">4.8 (1,247개)</span></div>';
+
+  if (currentLevel >= 3) {
+    html += `<div class="ai-highlight">
+      <strong style="font-size:0.75rem;">AI 리뷰 요약 (건성 피부 기준)</strong>
+      <p style="font-size:0.75rem;color:#555;margin-top:4px;">
+        "입술 각질 안 일어남" 87% · "색상 실물 동일" 92% · "보습력 우수" 78%
+      </p>
+    </div>`;
+  }
+
+  const reviews = currentLevel >= 2
+    ? [
+      { reviewer: '뷰티블로거 민지 · 건성', text: '성수 팝업에서 직접 발라보고 구매! 촉촉한 벨벳감이 하루종일 유지돼요. 각질 일어남 전혀 없음 👍' },
+      { reviewer: '리뷰어 수진 · 복합성', text: '사전 예약으로 한정판 겟! 패키징도 예쁘고 발색이 정말 선명해요. 재구매 의사 100%' },
+    ]
+    : [
+      { reviewer: 'user123', text: '좋아요' },
+      { reviewer: 'beauty_love', text: '색깔 예뻐요' },
+    ];
+
+  reviews.forEach(r => {
+    html += `<div class="review-item"><div class="reviewer">${r.reviewer}</div><div class="text">${r.text}</div></div>`;
+  });
+  html += '</div>';
+
+  if (currentLevel >= 3) {
+    html += `<div class="recommendation-bar">
+      <h4>이 상품과 함께 많이 구매한 조합</h4>
+      <div class="rec-items">
+        <div class="rec-item"><div class="rec-img">💋</div><span class="rec-name">립라이너</span></div>
+        <div class="rec-item"><div class="rec-img">🪞</div><span class="rec-name">립밤</span></div>
+        <div class="rec-item"><div class="rec-img">👝</div><span class="rec-name">파우치</span></div>
+      </div>
+    </div>`;
+  }
+
+  page.innerHTML = html;
+}
+
+function renderCart() {
+  const page = document.getElementById('page-2');
+  const p = products[0];
+  let html = '';
+
+  html += `<div class="cart-item">
+    <div class="cart-thumb">${p.emoji}</div>
+    <div class="cart-info">
+      <div class="cart-name">${titlesByLevel[currentLevel][0]}</div>
+      <div class="cart-price">${p.price.toLocaleString()}원</div>
+      <div class="cart-qty">수량: 1개</div>
+    </div>
+  </div>`;
+
+  if (currentLevel >= 2) {
+    html += '<div class="nudge-box">⚡ 지금 결제하면 내일 오전 7시 전 도착 보장</div>';
+  }
+
+  if (currentLevel >= 3) {
+    html += `<div class="nudge-box" style="background:#f8f5ff;border-color:#ede7f6;color:#7c3aed;">
+      🎁 8,000원만 더 담으면 무료배송 + 성수 팝업 미니어처 키트 증정
+    </div>`;
+    html += `<div class="recommendation-bar">
+      <h4>함께 담으면 무료배송 달성!</h4>
+      <div class="rec-items">
+        <div class="rec-item"><div class="rec-img">💧</div><span class="rec-name">미스트 9,900원</span></div>
+        <div class="rec-item"><div class="rec-img">🧴</div><span class="rec-name">샘플킷 8,500원</span></div>
+        <div class="rec-item"><div class="rec-img">🌸</div><span class="rec-name">핸드크림 12,000원</span></div>
+      </div>
+    </div>`;
+  }
+
+  html += `<div class="cart-summary">
+    <div class="row"><span>상품금액</span><span>${p.price.toLocaleString()}원</span></div>
+    <div class="row"><span>배송비</span><span>${currentLevel >= 3 ? '조건부 무료' : '3,000원'}</span></div>
+    <div class="row"><span>할인</span><span style="color:#e63946">-${(p.original - p.price).toLocaleString()}원</span></div>
+    <div class="row total"><span>결제 예정 금액</span><span>${currentLevel >= 3 ? p.price.toLocaleString() : (p.price + 3000).toLocaleString()}원</span></div>
+  </div>`;
+
+  if (currentLevel >= 1) {
+    html += `<div style="padding:12px 16px;">
+      <div class="ai-highlight">
+        <strong style="font-size:0.75rem;">구매 확신 포인트</strong>
+        <p style="font-size:0.75rem;color:#555;margin-top:4px;">
+          ${currentLevel >= 3
+            ? '✓ 건성 피부 만족도 94% · ✓ 30일 무료 반품 · ✓ 정품 보증 · ✓ 성수 팝업 한정 에디션 (잔여 12개)'
+            : '✓ 정품 보증 · ✓ 무료 반품 가능'}
+        </p>
+      </div>
+    </div>`;
+  }
+
+  page.innerHTML = html;
+}
+
+function renderComplete() {
+  const page = document.getElementById('page-3');
+  let html = '<div class="complete-page">';
+  html += '<div class="complete-icon">✅</div>';
+  html += '<h2>주문이 완료되었어요!</h2>';
+  html += '<p>내일 오전 7시 전 도착 예정</p>';
+
+  if (currentLevel >= 2) {
+    html += `<div class="share-prompt">
+      <h4>${currentLevel >= 3 ? '📝 구매 후기를 남기면 2,000P 적립!' : '📝 후기를 남겨주세요'}</h4>
+      <p>${currentLevel >= 3
+        ? '블로그에 300자 이상 상세 후기를 작성하면 추가 3,000P! (어휘 다양성 높을수록 보너스 UP)'
+        : '구매 후기를 남기면 500P 적립됩니다.'}</p>
+      <div class="share-btns">
+        <button class="share-btn blog">네이버 블로그</button>
+        <button class="share-btn insta">Instagram</button>
+      </div>
+    </div>`;
+  }
+
+  if (currentLevel >= 3) {
+    html += `<div style="width:100%;margin-top:16px;padding:12px;background:#f0fdf4;border-radius:8px;text-align:left;">
+      <strong style="font-size:0.8rem;color:#059669;">🎯 AI 제목 추천</strong>
+      <p style="font-size:0.75rem;color:#555;margin-top:4px;">
+        "샤넬 루쥬 알뤼르 | 성수 팝업 솔직 방문후기"<br>
+        <span style="color:#7c3aed;font-size:0.7rem;">→ 이 제목으로 작성 시 노출 확률 +47%</span>
+      </p>
+    </div>`;
+  }
+
+  html += '</div>';
+  page.innerHTML = html;
+}
+
+function renderMetrics() {
+  const m = metrics[currentLevel];
+  const panel = document.getElementById('metrics-panel');
+  const baseline = metrics[0];
+
+  function delta(current, base) {
+    const c = parseFloat(current);
+    const b = parseFloat(base);
+    if (isNaN(c) || isNaN(b) || b === 0) return '';
+    const d = ((c - b) / b * 100).toFixed(0);
+    if (d == 0) return '';
+    return `<div class="metric-delta ${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d)}% vs Control</div>`;
+  }
+
+  panel.innerHTML = `
+    <div class="metric-block"><div class="metric-label">CTR (클릭률)</div><div class="metric-value">${m.ctr}</div>${delta(m.ctr, baseline.ctr)}</div>
+    <div class="metric-block"><div class="metric-label">CVR (전환율)</div><div class="metric-value">${m.cvr}</div>${delta(m.cvr, baseline.cvr)}</div>
+    <div class="metric-block"><div class="metric-label">AOV (객단가)</div><div class="metric-value">${m.aov}</div>${delta(m.aov.replace(/[^0-9]/g,''), baseline.aov.replace(/[^0-9]/g,''))}</div>
+    <div class="metric-block"><div class="metric-label">리뷰 작성률</div><div class="metric-value">${m.retention}</div>${delta(m.retention, baseline.retention)}</div>
+    <div class="metric-block"><div class="metric-label">오가닉 버즈</div><div class="metric-value">${m.buzz}</div>${delta(m.buzz, baseline.buzz)}</div>
+  `;
+}
+
+function renderInterventions() {
+  const list = document.getElementById('intervention-list');
+  list.innerHTML = interventions.map(iv => {
+    const on = iv.levels.includes(currentLevel);
+    return `<li><span class="dot ${on ? 'on' : 'off'}"></span>${iv.label}</li>`;
+  }).join('');
+}
+
+// Init
+setLevel(0);
+setStep(0);
+</script>
+</body>
+</html>

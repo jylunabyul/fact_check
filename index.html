@@ -548,6 +548,32 @@ body {
   cursor: pointer;
 }
 
+.btn-back {
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: 2px solid #ddd;
+  background: #fff;
+  color: #666;
+  cursor: pointer;
+}
+
+.btn-back:hover { border-color: #999; color: #333; }
+
+.btn-cancel {
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  background: #f4f4f4;
+  color: #999;
+  cursor: pointer;
+}
+
+.btn-cancel:hover { background: #eee; color: #666; }
+
 .btn-next {
   flex: 1;
   padding: 14px;
@@ -558,6 +584,94 @@ body {
   cursor: pointer;
   background: #7c3aed;
   color: #fff;
+}
+
+/* Cancel/Exit Overlay */
+.exit-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.exit-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 85%;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  animation: slideUp 0.25s;
+}
+
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.exit-modal .exit-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.exit-modal h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.exit-modal p {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.exit-modal .exit-stats {
+  background: #f8f9fc;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.exit-modal .exit-stats .stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  padding: 3px 0;
+}
+
+.exit-modal .exit-stats .stat-row .stat-label { color: #888; }
+.exit-modal .exit-stats .stat-row .stat-value { font-weight: 700; }
+
+.exit-modal .exit-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.exit-modal .exit-btns button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+
+.exit-modal .btn-stay {
+  background: #e63946;
+  color: #fff;
+}
+
+.exit-modal .btn-leave {
+  background: #f4f4f4;
+  color: #666;
 }
 
 /* Side Panel - Metrics */
@@ -798,12 +912,67 @@ function updateBottomAction() {
   if (currentStep === 0) {
     ba.innerHTML = '<button class="btn-buy" onclick="nextStep()">상품 선택하기</button>';
   } else if (currentStep === 1) {
-    ba.innerHTML = '<button class="btn-cart" onclick="nextStep()">장바구니</button><button class="btn-buy" onclick="nextStep()">바로구매</button>';
+    ba.innerHTML = '<button class="btn-back" onclick="goBack()">← 뒤로</button><button class="btn-cart" onclick="nextStep()">장바구니</button><button class="btn-buy" onclick="nextStep()">바로구매</button>';
   } else if (currentStep === 2) {
-    ba.innerHTML = '<button class="btn-buy" onclick="nextStep()">결제하기</button>';
+    ba.innerHTML = '<button class="btn-cancel" onclick="showExitModal()">취소</button><button class="btn-back" onclick="goBack()">← 뒤로</button><button class="btn-buy" onclick="nextStep()">결제하기</button>';
   } else {
     ba.innerHTML = '<button class="btn-next" onclick="setStep(0)">처음으로</button>';
   }
+}
+
+const exitReasons = {
+  0: { icon: '🤔', title: '상품을 더 둘러보시겠어요?', desc: '아직 마음에 드는 상품을 찾지 못하셨나요?' },
+  1: { icon: '🛒', title: '상품 상세를 떠나시겠어요?', desc: '장바구니에 담아두면 나중에 다시 볼 수 있어요.' },
+  2: { icon: '💸', title: '결제를 취소하시겠어요?', desc: '장바구니에 상품이 담겨 있어요.\n나중에 다시 구매하실 수 있습니다.' },
+};
+
+const exitRates = {
+  0: { 0: '68%', 1: '54%', 2: '38%', 3: '22%' },
+  1: { 0: '45%', 1: '38%', 2: '24%', 3: '15%' },
+  2: { 0: '52%', 1: '41%', 2: '28%', 3: '18%' },
+};
+
+function goBack() {
+  if (currentStep > 0) setStep(currentStep - 1);
+}
+
+function showExitModal() {
+  const phone = document.getElementById('phone');
+  const existing = phone.querySelector('.exit-overlay');
+  if (existing) existing.remove();
+
+  const reason = exitReasons[currentStep] || exitReasons[2];
+  const rate = exitRates[currentStep] ? exitRates[currentStep][currentLevel] : '—';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'exit-overlay';
+  overlay.innerHTML = `
+    <div class="exit-modal">
+      <div class="exit-icon">${reason.icon}</div>
+      <h3>${reason.title}</h3>
+      <p>${reason.desc}</p>
+      <div class="exit-stats">
+        <div class="stat-row"><span class="stat-label">현재 단계 이탈률</span><span class="stat-value">${rate}</span></div>
+        <div class="stat-row"><span class="stat-label">AI 개입 수준</span><span class="stat-value">Level ${currentLevel}</span></div>
+        <div class="stat-row"><span class="stat-label">이탈 시점</span><span class="stat-value">Step ${currentStep + 1} / 4</span></div>
+      </div>
+      <div class="exit-btns">
+        <button class="btn-leave" onclick="confirmExit()">떠나기</button>
+        <button class="btn-stay" onclick="dismissExitModal()">계속 쇼핑</button>
+      </div>
+    </div>
+  `;
+  phone.appendChild(overlay);
+}
+
+function dismissExitModal() {
+  const overlay = document.querySelector('.exit-overlay');
+  if (overlay) overlay.remove();
+}
+
+function confirmExit() {
+  dismissExitModal();
+  setStep(0);
 }
 
 function renderCurrentPage() {

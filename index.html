@@ -377,6 +377,7 @@ body {
 
 <!-- Landing -->
 <div class="landing" id="landing">
+  <a href="dashboard.html" style="position:fixed;top:16px;right:16px;z-index:9999;padding:10px 18px;background:rgba(255,255,255,0.95);border-radius:10px;font-size:0.78rem;font-weight:700;color:#764ba2;text-decoration:none;box-shadow:0 2px 12px rgba(0,0,0,0.15);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">📊 시뮬레이터 대시보드</a>
   <div class="landing-card">
     <h1>온라인 쇼핑 경험 실험</h1>
     <div class="sub">AI 개입이 쇼핑 만족도에 미치는 영향 연구 (약 5~7분 소요)</div>
@@ -856,13 +857,13 @@ let state = {
 const CREDITS = { detergent: 20000, notebook: 2000000 };
 
 const PRODUCTS = {
-  detergent: [
-    { id: 'A', brand: '리큐', name: '리큐 액체세제 3L', price: 12900, rating: 4.7, reviews: 12400, emoji: '🧴', features: '대용량, 드럼/일반 겸용', reviewText: '"가성비 좋아요", "세탁력 좋음", "향이 은은해요"' },
-    { id: 'B', brand: '피죤', name: '피죤 울샴푸 2L', price: 9800, rating: 4.5, reviews: 8200, emoji: '🧴', features: '울/실크 전용, 섬유 보호', reviewText: '"니트 세탁에 좋아요", "거품 적당함", "가격 착해요"' },
-    { id: 'C', brand: '다우니', name: '다우니 실내건조 2.1L', price: 14500, rating: 4.8, reviews: 21300, emoji: '🧴', features: '실내건조 냄새 제거, 드럼/일반 겸용, 무형광', reviewText: '"냄새 없어요", "실내건조해도 뽀송", "용량 대비 가격 적당"' },
-    { id: 'D', brand: '테크', name: '테크 드럼세탁기용 3L', price: 11200, rating: 4.6, reviews: 9800, emoji: '🧴', features: '드럼 전용, 저거품, 강력세척', reviewText: '"드럼에 딱이에요", "찌든때도 잘 빠져요", "냄새 안 남아요"' },
-    { id: 'E', brand: '아이깨끗해', name: '아이깨끗해 아기전용 1.5L', price: 16800, rating: 4.9, reviews: 5600, emoji: '🍼', features: '무형광, 무향, 피부 자극 없음', reviewText: '"아기 옷 전용으로 써요", "민감 피부에도 좋아요", "순해요"' },
-    { id: 'F', brand: '퍼실', name: '퍼실 파워젤 2.7L', price: 18900, rating: 4.6, reviews: 7100, emoji: '🧴', features: '강력 세척, 고농축, 향 지속', reviewText: '"세탁력 최고", "향이 오래가요", "비싸지만 값어치해요"' },
+  shampoo: [
+    { id: 'A', brand: '케라시스', name: '케라시스 퍼퓸 샴푸 600ml', price: 8900, rating: 4.7, reviews: 15200, emoji: '🧴', features: '향기 지속, 손상모 케어, 실리콘프리', reviewText: '"향이 하루종일 가요", "머릿결 부드러워짐", "가성비 좋아요"' },
+    { id: 'B', brand: '아모스', name: '아모스 녹차실감 샴푸 500ml', price: 12500, rating: 4.6, reviews: 9800, emoji: '🧴', features: '두피 진정, 녹차 추출물, 약산성', reviewText: '"두피 가려움 줄었어요", "시원한 느낌", "거품 풍부"' },
+    { id: 'C', brand: '다슈', name: '다슈 데일리 스칼프 샴푸 500ml', price: 14200, rating: 4.8, reviews: 21000, emoji: '🧴', features: '탈모 예방, 두피 강화, 비오틴 함유', reviewText: '"머리 빠지는 게 줄었어요", "두피 개운함", "남녀 모두 좋아요"' },
+    { id: 'D', brand: '닥터방기원', name: '닥터방기원 탈모샴푸 500ml', price: 15800, rating: 4.5, reviews: 11200, emoji: '🧴', features: '탈모증상 완화, 식약처 인증, 한방 성분', reviewText: '"효과 있는 것 같아요", "향이 괜찮아요", "거품 적당함"' },
+    { id: 'E', brand: '라보에이치', name: '라보에이치 두피강화 샴푸 400ml', price: 18500, rating: 4.9, reviews: 7600, emoji: '🧴', features: '프로바이오틱스, 약산성, 민감두피용', reviewText: '"민감한 두피에 자극 없어요", "순하고 좋아요", "비싸지만 가치있음"' },
+    { id: 'F', brand: '려', name: '려 자양윤모 샴푸 820ml', price: 11900, rating: 4.6, reviews: 18400, emoji: '🧴', features: '대용량, 인삼 성분, 윤기 부여', reviewText: '"대용량 가성비 좋아요", "머릿결 윤기나요", "한방향 좋아요"' },
   ],
   notebook: [
     { id: 'A', brand: 'LG', name: 'LG 그램 16 (i5/16GB/512GB)', price: 1490000, rating: 4.8, reviews: 8200, emoji: '💻', features: '무게 1.19kg, 배터리 최대 22시간, 16인치 IPS', reviewText: '"가볍고 배터리 오래가요", "화면 선명함", "발열 적음"' },
@@ -876,26 +877,26 @@ const PRODUCTS = {
 
 // ===== AI 추천 메시지 + 선택지 =====
 const AI_PROACTIVE_MSG = {
-  detergent: {
+  shampoo: {
     S0: {
-      message: '세탁세제를 찾고 계시는군요! 어떤 세탁기를 사용하세요?',
+      message: '샴푸를 찾고 계시는군요! 어떤 두피/모발 고민이 있으세요?',
       choices: [
-        { label: '① 드럼세탁기', response: '드럼세탁기에 맞는 제품으로 테크 드럼세탁기용 3L(11,200원)과 다우니 실내건조 2.1L(14,500원)을 추천드려요. 피부 자극이 걱정되시면 아이깨끗해 아기전용도 있어요.' },
-        { label: '② 일반(통돌이) 세탁기', response: '통돌이 세탁기용으로는 리큐 액체세제 3L(12,900원)과 피죤 울샴푸 2L(9,800원)이 인기 있어요. 용량 대비 가격을 중시하시나요, 아니면 세탁력을 더 중시하시나요?' },
+        { label: '① 탈모/두피 케어', response: '두피 케어 제품으로 다슈 데일리 스칼프 샴푸(14,200원)와 닥터방기원 탈모샴푸(15,800원)를 추천드려요. 민감 두피라면 라보에이치(18,500원)도 좋아요.' },
+        { label: '② 향기/손상모 케어', response: '향기와 손상모 케어에는 케라시스 퍼퓸 샴푸(8,900원)가 인기 많아요. 윤기를 원하시면 려 자양윤모(11,900원)도 추천드려요.' },
         { label: '③ 직접 탐색할게요', response: null },
       ],
     },
     S1: {
       message: '지금 보고 계신 제품과 비슷한 가격대의 다른 제품들을 비교해드릴까요?',
       choices: [
-        { label: '① 네, 비교해주세요', response: '비교해드릴게요. 리큐 액체세제 3L은 12,900원으로 용량이 많아 가성비가 좋고, 다우니 실내건조는 14,500원으로 실내건조 냄새 제거에 특화되어 있어요. 실내건조를 자주 하신다면 다우니, 가성비를 원하시면 리큐를 추천해요.' },
+        { label: '① 네, 비교해주세요', response: '비교해드릴게요. 아모스 녹차실감(12,500원)은 두피 진정에 특화되어 있고, 다슈 스칼프(14,200원)는 탈모 예방 기능이 강점이에요. 두피 고민이 크시면 다슈, 자극 없는 제품을 원하시면 아모스를 추천해요.' },
         { label: '② 괜찮아요, 직접 볼게요', response: null },
       ],
     },
     S2: {
-      message: '결제 전에 확인해드릴게요! 담아두신 제품, 500ml 추가 증량 기획팩이 같은 가격에 있어요. 교체하시겠어요?',
+      message: '결제 전에 확인해드릴게요! 이 제품 2+1 기획팩이 같은 가격에 있어요. 교체하시겠어요?',
       choices: [
-        { label: '① 네, 기획팩으로 교체할게요', response: '기획팩으로 교체했어요! 같은 가격에 500ml 더 받으실 수 있어요.' },
+        { label: '① 네, 기획팩으로 교체할게요', response: '기획팩으로 교체했어요! 같은 가격에 1개 더 받으실 수 있어요.' },
         { label: '② 아니요, 그대로 결제할게요', response: null },
       ],
       followUp: {

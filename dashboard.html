@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실험 시뮬레이션 대시보드 — AI 개입 타이밍 연구 (N=800)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  background: #0f0f1a;
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+
+.dash-header {
+  background: #1a1a2e;
+  border-bottom: 1px solid #2a2a4a;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.dash-header h1 { font-size: 1.1rem; font-weight: 700; color: #fff; }
+.dash-header .subtitle { font-size: 0.72rem; color: #888; margin-top: 2px; }
+.header-status { display: flex; align-items: center; gap: 12px; }
+.status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.status-badge.ready { background: #1e3a2e; color: #4ade80; }
+.status-badge.running { background: #3a2e1e; color: #fbbf24; animation: pulse 1.5s infinite; }
+.status-badge.done { background: #1e2e3a; color: #60a5fa; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+.dash-body {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100vh - 60px);
+}
+
+.sidebar {
+  background: #151525;
+  border-right: 1px solid #2a2a4a;
+  padding: 24px 20px;
+  overflow-y: auto;
+}
+.sidebar h2 { font-size: 0.85rem; font-weight: 700; color: #7c3aed; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.config-section { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #2a2a4a; }
+.config-section h3 { font-size: 0.78rem; font-weight: 600; color: #aaa; margin-bottom: 12px; }
+
+.product-cards { display: flex; gap: 10px; margin-top: 10px; }
+.product-card {
+  flex: 1; padding: 12px 10px; border-radius: 10px;
+  border: 1px solid #3a3a5a; text-align: center; background: #1a1a2e;
+}
+.product-card .pc-emoji { font-size: 1.4rem; display: block; margin-bottom: 6px; }
+.product-card .pc-name { color: #fff; font-weight: 700; font-size: 0.82rem; }
+.product-card .pc-price { color: #7c3aed; font-size: 0.75rem; margin-top: 4px; font-weight: 600; }
+.product-card .pc-involve { color: #888; font-size: 0.65rem; margin-top: 4px; }
+.product-card .pc-n { color: #4ade80; font-size: 0.72rem; margin-top: 6px; font-weight: 600; }
+
+.total-count {
+  background: #1a1a2e; border: 1px solid #3a3a5a; border-radius: 8px;
+  padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; margin-top: 12px;
+}
+.total-count .label { font-size: 0.75rem; color: #888; }
+.total-count .value { font-size: 1.1rem; font-weight: 800; color: #7c3aed; }
+.config-note { font-size: 0.68rem; color: #666; margin-top: 8px; line-height: 1.4; }
+
+.slider-group { margin-bottom: 14px; }
+.slider-group .slider-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: #aaa; margin-bottom: 4px; }
+.slider-group input[type="range"] { width: 100%; height: 4px; -webkit-appearance: none; background: #3a3a5a; border-radius: 2px; outline: none; }
+.slider-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #7c3aed; cursor: pointer; }
+
+.speed-control { display: flex; gap: 6px; margin-top: 12px; }
+.speed-btn { flex: 1; padding: 6px; border: 1px solid #3a3a5a; background: transparent; color: #aaa; border-radius: 6px; font-size: 0.7rem; cursor: pointer; }
+.speed-btn.active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+
+.btn-run {
+  width: 100%; padding: 14px; background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #fff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; margin-top: 8px; transition: all 0.2s;
+}
+.btn-run:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,58,237,0.4); }
+.btn-run:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-reset { width: 100%; padding: 10px; background: transparent; color: #888; border: 1px solid #3a3a5a; border-radius: 8px; font-size: 0.8rem; cursor: pointer; margin-top: 8px; }
+.btn-export { width: 100%; padding: 10px; background: #1e3a2e; color: #4ade80; border: 1px solid #2a5a3e; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+
+.main-content { padding: 24px; overflow-y: auto; }
+
+.design-summary { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+.design-summary h3 { font-size: 0.82rem; font-weight: 700; color: #fff; margin-bottom: 12px; }
+.design-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.design-chip { padding: 6px 12px; border-radius: 6px; font-size: 0.7rem; border: 1px solid #3a3a5a; }
+.design-chip.iv { background: #1a2a3a; color: #60a5fa; border-color: #2a4a6a; }
+.design-chip.dv { background: #1a3a2a; color: #4ade80; border-color: #2a5a3a; }
+.design-chip.n { background: #2a1a3a; color: #a78bfa; border-color: #4a3a6a; }
+
+.sim-progress { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: none; }
+.sim-progress.show { display: block; }
+.progress-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.progress-header .label { font-size: 0.78rem; color: #ccc; }
+.progress-header .count { font-size: 0.78rem; color: #7c3aed; font-weight: 700; }
+.progress-bar-wrap { height: 6px; background: #2a2a4a; border-radius: 3px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #a855f7); border-radius: 3px; transition: width 0.1s; width: 0%; }
+.progress-detail { display: flex; gap: 16px; margin-top: 8px; font-size: 0.68rem; color: #888; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+.kpi-card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 16px; }
+.kpi-card .kpi-label { font-size: 0.68rem; color: #888; letter-spacing: 0.3px; margin-bottom: 6px; }
+.kpi-card .kpi-value { font-size: 1.5rem; font-weight: 800; color: #fff; }
+.kpi-card .kpi-sub { font-size: 0.7rem; color: #666; margin-top: 4px; }
+.kpi-card .kpi-bar { height: 3px; background: #2a2a4a; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.kpi-card .kpi-bar-fill { height: 100%; background: #7c3aed; border-radius: 2px; transition: width 0.3s; }
+
+.product-tab-bar { display: flex; gap: 4px; margin-bottom: 16px; }
+.product-tab { flex: 1; padding: 10px; border: 1px solid #3a3a5a; background: transparent; color: #aaa; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center; }
+.product-tab.active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 20px; }
+.chart-card.full-width { grid-column: 1 / -1; }
+.chart-card h3 { font-size: 0.82rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.chart-card .chart-desc { font-size: 0.68rem; color: #666; margin-bottom: 14px; }
+.chart-container { position: relative; height: 240px; }
+.chart-container.tall { height: 320px; }
+
+.group-table-wrap { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.group-table-wrap h3 { font-size: 0.82rem; font-weight: 700; color: #fff; margin-bottom: 12px; }
+.group-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+.group-table th { background: #2a2a4a; padding: 8px 10px; text-align: left; font-weight: 700; color: #a78bfa; }
+.group-table td { padding: 8px 10px; border-bottom: 1px solid #222240; color: #ccc; }
+.group-table tr:hover td { background: #1a1530; }
+.group-table .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.62rem; font-weight: 700; }
+.badge-det { background: #1a2a3a; color: #60a5fa; }
+.badge-note { background: #2a1a2a; color: #f472b6; }
+.badge-l0 { background: #2a2a2a; color: #9ca3af; }
+.badge-l1 { background: #1a2a3a; color: #60a5fa; }
+.badge-l2 { background: #2a2a1a; color: #fbbf24; }
+
+.stats-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.stats-table th, .stats-table td { padding: 8px 12px; font-size: 0.75rem; text-align: left; border-bottom: 1px solid #2a2a4a; }
+.stats-table th { color: #888; font-weight: 600; font-size: 0.65rem; letter-spacing: 0.3px; }
+.stats-table td { color: #ccc; }
+.stats-table .sig { color: #4ade80; font-weight: 700; }
+.stats-table .not-sig { color: #ef4444; }
+
+.cell-matrix {
+  display: grid; grid-template-columns: auto repeat(3, 1fr);
+  gap: 2px; margin-top: 12px;
+}
+.cell-matrix .cell-header { background: #2a2a4a; padding: 8px 10px; font-size: 0.7rem; font-weight: 700; text-align: center; color: #ccc; }
+.cell-matrix .cell-row-header { background: #2a2a4a; padding: 8px 10px; font-size: 0.7rem; font-weight: 600; color: #aaa; display: flex; align-items: center; }
+.cell-matrix .cell { background: #151525; padding: 10px; text-align: center; border: 1px solid #2a2a4a; transition: all 0.3s; }
+.cell-matrix .cell .cell-n { font-size: 0.65rem; color: #666; margin-bottom: 2px; }
+.cell-matrix .cell .cell-mean { font-size: 1rem; font-weight: 800; color: #fff; }
+.cell-matrix .cell .cell-sd { font-size: 0.6rem; color: #888; margin-top: 2px; }
+.cell-matrix .cell.highlight { border-color: #7c3aed; background: #1a1530; }
+
+.live-feed { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 16px; max-height: 160px; overflow-y: auto; margin-bottom: 20px; display: none; }
+.live-feed.show { display: block; }
+.live-feed h3 { font-size: 0.78rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+.feed-entry { font-size: 0.7rem; padding: 4px 0; color: #aaa; border-bottom: 1px solid #1f1f35; display: flex; gap: 8px; }
+.feed-entry .feed-id { color: #7c3aed; font-weight: 600; min-width: 50px; }
+.feed-entry .feed-group { color: #fbbf24; min-width: 36px; }
+.feed-entry .feed-score { color: #4ade80; }
+
+@media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .chart-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .dash-body { grid-template-columns: 1fr; } .sidebar { border-right: none; border-bottom: 1px solid #2a2a4a; } }
+</style>
+</head>
+<body>
+
+<div class="dash-header">
+  <div>
+    <h1>AI 개입 쇼핑 실험 — 시뮬레이션 대시보드</h1>
+    <div class="subtitle">7그룹 × 2제품 = 14그룹 피험자 간 설계 | 총 N=800 (세탁세제 400 + 노트북 400) | 그룹당 ~57명</div>
+  </div>
+  <div class="header-status">
+    <span class="status-badge ready" id="status-badge">준비</span>
+  </div>
+</div>
+
+<div class="dash-body">
+  <div class="sidebar">
+    <h2>시뮬레이션 설정</h2>
+
+    <div class="config-section">
+      <h3>상품별 참가자 배정</h3>
+      <div class="product-cards">
+        <div class="product-card">
+          <span class="pc-emoji">🧴</span>
+          <div class="pc-name">세탁세제</div>
+          <div class="pc-price">2만원 크레딧</div>
+          <div class="pc-involve">저관여 상품</div>
+          <div class="pc-n">400명 (7그룹)</div>
+        </div>
+        <div class="product-card">
+          <span class="pc-emoji">💻</span>
+          <div class="pc-name">노트북</div>
+          <div class="pc-price">200만원 크레딧</div>
+          <div class="pc-involve">고관여 상품</div>
+          <div class="pc-n">400명 (7그룹)</div>
+        </div>
+      </div>
+      <div class="total-count">
+        <span class="label">총 참가자</span>
+        <span class="value">800명</span>
+      </div>
+      <div class="config-note">* 14그룹 × ~57명 = 800명<br>* L0(통제): 1그룹, L1(반응): 3그룹(S0/S1/S2), L2(선제): 3그룹(S0/S1/S2) per 제품</div>
+    </div>
+
+    <div class="config-section">
+      <h3>효과 크기 (Cohen's d)</h3>
+      <div class="slider-group">
+        <div class="slider-label"><span>AI 수준 효과 (L0 vs L1 vs L2)</span><span id="effect-level-val">0.45</span></div>
+        <input type="range" id="effect-level" min="0.1" max="1.0" step="0.05" value="0.45" oninput="document.getElementById('effect-level-val').textContent=this.value">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>개입 단계 효과 (S0/S1/S2)</span><span id="effect-stage-val">0.35</span></div>
+        <input type="range" id="effect-stage" min="0.1" max="1.0" step="0.05" value="0.35" oninput="document.getElementById('effect-stage-val').textContent=this.value">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>수준×단계 상호작용</span><span id="effect-inter-val">0.50</span></div>
+        <input type="range" id="effect-inter" min="0.1" max="1.0" step="0.05" value="0.50" oninput="document.getElementById('effect-inter-val').textContent=this.value">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>제품 관여도 조절효과</span><span id="effect-prod-val">0.30</span></div>
+        <input type="range" id="effect-prod" min="0.0" max="0.8" step="0.05" value="0.30" oninput="document.getElementById('effect-prod-val').textContent=this.value">
+      </div>
+      <div class="slider-group">
+        <div class="slider-label"><span>개인차 변동 (SD)</span><span id="noise-val">1.2</span></div>
+        <input type="range" id="noise" min="0.5" max="2.0" step="0.1" value="1.2" oninput="document.getElementById('noise-val').textContent=this.value">
+      </div>
+    </div>
+
+    <div class="config-section" style="border-bottom: none;">
+      <h3>실행 속도</h3>
+      <div class="speed-control">
+        <button class="speed-btn" onclick="setSpeed(60)" id="speed-60">느림</button>
+        <button class="speed-btn active" onclick="setSpeed(15)" id="speed-15">보통</button>
+        <button class="speed-btn" onclick="setSpeed(3)" id="speed-3">빠름</button>
+        <button class="speed-btn" onclick="setSpeed(0)" id="speed-0">즉시</button>
+      </div>
+      <button class="btn-run" id="btn-run" onclick="runSimulation()">▶ 시뮬레이션 실행 (800명)</button>
+      <button class="btn-reset" onclick="resetSimulation()">초기화</button>
+      <button class="btn-export" onclick="exportCSV()" id="btn-export" style="display:none">📥 CSV 내보내기</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="design-summary">
+      <h3>실험 설계 요약 — 14그룹 Between-Subjects</h3>
+      <div class="design-chips">
+        <div class="design-chip iv">독립변수 1: AI 개입 수준 (L0 없음 / L1 반응적 / L2 선제적)</div>
+        <div class="design-chip iv">독립변수 2: AI 개입 단계 (S0 탐색 / S1 고려 / S2 구매결정)</div>
+        <div class="design-chip iv">조절변수: 제품 관여도 (세탁세제 저관여 vs 노트북 고관여)</div>
+        <div class="design-chip dv">종속변수: 관여도, 통제감, 자기결정확신, 구매만족도 (7점 척도)</div>
+        <div class="design-chip n">N=800 | 14그룹(G1~G14) × ~57명 | 제품당 400명</div>
+      </div>
+    </div>
+
+    <div class="sim-progress" id="sim-progress">
+      <div class="progress-header">
+        <span class="label">시뮬레이션 진행 중...</span>
+        <span class="count" id="progress-count">0 / 800</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-detail">
+        <span id="progress-group">그룹: —</span>
+        <span id="progress-product">상품: —</span>
+        <span id="progress-elapsed">경과: 0s</span>
+      </div>
+    </div>
+
+    <div class="live-feed" id="live-feed">
+      <h3>실시간 참가자 피드</h3>
+      <div id="feed-container"></div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">총 참가자</div>
+        <div class="kpi-value" id="kpi-n">0</div>
+        <div class="kpi-sub">800명 목표</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-n-bar" style="width:0%"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">평균 관여도</div>
+        <div class="kpi-value" id="kpi-inv">—</div>
+        <div class="kpi-sub">7점 척도</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-inv-bar" style="width:0%"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">평균 통제감</div>
+        <div class="kpi-value" id="kpi-ctrl">—</div>
+        <div class="kpi-sub">7점 척도</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-ctrl-bar" style="width:0%"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">평균 확신</div>
+        <div class="kpi-value" id="kpi-conf">—</div>
+        <div class="kpi-sub">7점 척도</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-conf-bar" style="width:0%"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">평균 만족도</div>
+        <div class="kpi-value" id="kpi-sat">—</div>
+        <div class="kpi-sub">7점 척도</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-sat-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="product-tab-bar">
+      <button class="product-tab active" id="tab-all" onclick="switchTab('all')">전체 (800명)</button>
+      <button class="product-tab" id="tab-detergent" onclick="switchTab('detergent')">🧴 세탁세제 (400명)</button>
+      <button class="product-tab" id="tab-notebook" onclick="switchTab('notebook')">💻 노트북 (400명)</button>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card full-width">
+        <h3>AI 수준 × 개입 단계 상호작용 — 구매 만족도</h3>
+        <div class="chart-desc">L0(통제) vs L1(반응적) vs L2(선제적), 각 단계별 평균</div>
+        <div class="chart-container tall"><canvas id="chart-interaction"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>AI 수준별 종속변수 비교</h3>
+        <div class="chart-desc">L0 / L1 / L2 전체 평균</div>
+        <div class="chart-container"><canvas id="chart-level"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>개입 단계별 종속변수 비교</h3>
+        <div class="chart-desc">S0(탐색) / S1(고려) / S2(구매결정)</div>
+        <div class="chart-container"><canvas id="chart-stage"></canvas></div>
+      </div>
+      <div class="chart-card full-width">
+        <h3>제품 관여도 조절효과 — 통제감</h3>
+        <div class="chart-desc">세탁세제(저관여) vs 노트북(고관여): AI 수준에 따른 통제감 변화</div>
+        <div class="chart-container tall"><canvas id="chart-product"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 14그룹 진행 현황 테이블 -->
+    <div class="group-table-wrap">
+      <h3>14그룹 현황</h3>
+      <table class="group-table">
+        <thead>
+          <tr><th>그룹</th><th>제품</th><th>AI 수준</th><th>단계</th><th>N</th><th>통제감</th><th>확신</th><th>만족도</th><th>구매율</th></tr>
+        </thead>
+        <tbody id="group-table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Cell Matrix: 세탁세제 -->
+    <div class="chart-card full-width" style="margin-bottom:16px;">
+      <h3>🧴 세탁세제 — 셀별 만족도</h3>
+      <div class="chart-desc">평균 (SD)</div>
+      <div class="cell-matrix" id="cell-matrix-det">
+        <div class="cell-header"></div>
+        <div class="cell-header">L0 (없음)</div>
+        <div class="cell-header">L1 (반응적)</div>
+        <div class="cell-header">L2 (선제적)</div>
+        <div class="cell-row-header">S0 탐색</div>
+        <div class="cell" id="cell-det-S0-L0"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-det-S0-L1"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-det-S0-L2"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell-row-header">S1 고려</div>
+        <div class="cell" id="cell-det-S1-L0"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-det-S1-L1"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-det-S1-L2"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell-row-header">S2 구매결정</div>
+        <div class="cell" id="cell-det-S2-L0"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-det-S2-L1"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell highlight" id="cell-det-S2-L2"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+      </div>
+    </div>
+
+    <!-- Cell Matrix: 노트북 -->
+    <div class="chart-card full-width" style="margin-bottom:20px;">
+      <h3>💻 노트북 — 셀별 만족도</h3>
+      <div class="chart-desc">평균 (SD)</div>
+      <div class="cell-matrix" id="cell-matrix-nb">
+        <div class="cell-header"></div>
+        <div class="cell-header">L0 (없음)</div>
+        <div class="cell-header">L1 (반응적)</div>
+        <div class="cell-header">L2 (선제적)</div>
+        <div class="cell-row-header">S0 탐색</div>
+        <div class="cell" id="cell-nb-S0-L0"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-nb-S0-L1"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-nb-S0-L2"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell-row-header">S1 고려</div>
+        <div class="cell" id="cell-nb-S1-L0"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-nb-S1-L1"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-nb-S1-L2"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell-row-header">S2 구매결정</div>
+        <div class="cell" id="cell-nb-S2-L0"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell" id="cell-nb-S2-L1"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+        <div class="cell highlight" id="cell-nb-S2-L2"><div class="cell-n">—</div><div class="cell-mean">—</div></div>
+      </div>
+    </div>
+
+    <!-- ANOVA -->
+    <div class="chart-grid">
+      <div class="chart-card full-width">
+        <h3>ANOVA 결과 — 구매 만족도</h3>
+        <div class="chart-desc">2(AI 수준) × 3(단계) × 2(제품) 분산분석</div>
+        <table class="stats-table">
+          <thead><tr><th>변산원</th><th>SS</th><th>df</th><th>MS</th><th>F</th><th>p</th><th>η²p</th><th>판정</th></tr></thead>
+          <tbody id="anova-body">
+            <tr><td colspan="8" style="color:#666;text-align:center;padding:20px;">시뮬레이션을 실행하면 결과가 표시됩니다</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="chart-card">
+        <h3>사후 검정: Tukey HSD</h3>
+        <div class="chart-desc">AI 수준 간 쌍별 비교 (만족도)</div>
+        <table class="stats-table">
+          <thead><tr><th>비교</th><th>평균차</th><th>p</th><th>판정</th></tr></thead>
+          <tbody id="posthoc-body">
+            <tr><td colspan="4" style="color:#666;text-align:center;padding:20px;">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="chart-card">
+        <h3>구매율 비교</h3>
+        <div class="chart-desc">AI 수준별 구매 전환율</div>
+        <table class="stats-table">
+          <thead><tr><th>조건</th><th>N</th><th>구매</th><th>구매율</th></tr></thead>
+          <tbody id="purchase-body">
+            <tr><td colspan="4" style="color:#666;text-align:center;padding:20px;">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOTAL_N = 800;
+const GROUP_CONFIG = {
+  G1:  { product: 'detergent', level: 'L0', aiStage: null },
+  G2:  { product: 'detergent', level: 'L1', aiStage: 'S0' },
+  G3:  { product: 'detergent', level: 'L1', aiStage: 'S1' },
+  G4:  { product: 'detergent', level: 'L1', aiStage: 'S2' },
+  G5:  { product: 'detergent', level: 'L2', aiStage: 'S0' },
+  G6:  { product: 'detergent', level: 'L2', aiStage: 'S1' },
+  G7:  { product: 'detergent', level: 'L2', aiStage: 'S2' },
+  G8:  { product: 'notebook',  level: 'L0', aiStage: null },
+  G9:  { product: 'notebook',  level: 'L1', aiStage: 'S0' },
+  G10: { product: 'notebook',  level: 'L1', aiStage: 'S1' },
+  G11: { product: 'notebook',  level: 'L1', aiStage: 'S2' },
+  G12: { product: 'notebook',  level: 'L2', aiStage: 'S0' },
+  G13: { product: 'notebook',  level: 'L2', aiStage: 'S1' },
+  G14: { product: 'notebook',  level: 'L2', aiStage: 'S2' },
+};
+
+const STAGES = ['S0', 'S1', 'S2'];
+const LEVELS = ['L0', 'L1', 'L2'];
+const STAGE_LABELS = { S0: '탐색', S1: '고려', S2: '구매결정' };
+const LEVEL_LABELS = { L0: '없음', L1: '반응적', L2: '선제적' };
+
+let participants = [];
+let simRunning = false;
+let simSpeed = 15;
+let charts = {};
+let currentTab = 'all';
+
+function gaussianRandom(mean = 0, sd = 1) {
+  let u1 = Math.random(), u2 = Math.random();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * sd + mean;
+}
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+function roundTo(v, d) { return +v.toFixed(d); }
+
+function generateParticipant(group) {
+  const cfg = GROUP_CONFIG[group];
+  const effectLevel = parseFloat(document.getElementById('effect-level').value);
+  const effectStage = parseFloat(document.getElementById('effect-stage').value);
+  const effectInter = parseFloat(document.getElementById('effect-inter').value);
+  const effectProd = parseFloat(document.getElementById('effect-prod').value);
+  const noise = parseFloat(document.getElementById('noise').value);
+
+  const isNotebook = cfg.product === 'notebook';
+  const prodMod = isNotebook ? (1 + effectProd) : (1 - effectProd * 0.5);
+
+  // 관여도: 노트북 높음, 세탁세제 낮음
+  const invBase = isNotebook ? 5.5 : 3.2;
+  const involvement = [
+    clamp(roundTo(invBase + gaussianRandom(0, 1.0), 0), 1, 7),
+    clamp(roundTo(invBase + gaussianRandom(0, 1.0), 0), 1, 7),
+    clamp(roundTo(invBase + gaussianRandom(0, 1.0), 0), 1, 7),
+  ];
+
+  // 통제감: L0 높음 → L2 낮음, S2에서 더 낮음
+  let ctrlBase = 5.5;
+  if (cfg.level === 'L1') ctrlBase -= effectLevel * 0.5;
+  if (cfg.level === 'L2') ctrlBase -= effectLevel * 1.0;
+  if (cfg.aiStage === 'S2') ctrlBase -= effectStage * 0.4;
+  if (cfg.aiStage === 'S1') ctrlBase -= effectStage * 0.15;
+  if (cfg.level === 'L2' && cfg.aiStage === 'S2') ctrlBase -= effectInter * 0.5;
+  ctrlBase *= prodMod > 1 ? 1 : prodMod;
+  const control = [
+    clamp(roundTo(ctrlBase + gaussianRandom(0, noise * 0.7), 0), 1, 7),
+    clamp(roundTo(ctrlBase + gaussianRandom(0, noise * 0.7), 0), 1, 7),
+    clamp(roundTo(ctrlBase + gaussianRandom(0, noise * 0.7), 0), 1, 7),
+  ];
+
+  // 자기결정확신: L1에서 약간 상승, L2에서 하락
+  let confBase = 4.8;
+  if (cfg.level === 'L1') confBase += effectLevel * 0.3;
+  if (cfg.level === 'L2') confBase -= effectLevel * 0.2;
+  if (cfg.aiStage === 'S1') confBase += effectStage * 0.2;
+  if (isNotebook) confBase += 0.3;
+  const confidence = [
+    clamp(roundTo(confBase + gaussianRandom(0, noise * 0.75), 0), 1, 7),
+    clamp(roundTo(confBase + gaussianRandom(0, noise * 0.75), 0), 1, 7),
+    clamp(roundTo(confBase + gaussianRandom(0, noise * 0.75), 0), 1, 7),
+  ];
+
+  // 만족도: L1 > L2 > L0, S1에서 가장 높음
+  let satBase = 4.3;
+  if (cfg.level === 'L1') satBase += effectLevel * 0.7;
+  if (cfg.level === 'L2') satBase += effectLevel * 0.35;
+  if (cfg.aiStage === 'S1') satBase += effectStage * 0.3;
+  if (cfg.aiStage === 'S0') satBase += effectStage * 0.1;
+  if (cfg.level === 'L1' && cfg.aiStage === 'S1') satBase += effectInter * 0.3;
+  if (isNotebook) satBase += 0.2;
+  const satisfaction = [
+    clamp(roundTo(satBase + gaussianRandom(0, noise * 0.65), 0), 1, 7),
+    clamp(roundTo(satBase + gaussianRandom(0, noise * 0.65), 0), 1, 7),
+    clamp(roundTo(satBase + gaussianRandom(0, noise * 0.65), 0), 1, 7),
+  ];
+
+  // 구매 여부
+  let purchaseProb = 0.70;
+  if (cfg.level === 'L1') purchaseProb += 0.10;
+  if (cfg.level === 'L2') purchaseProb += 0.06;
+  if (cfg.aiStage === 'S2') purchaseProb += 0.05;
+  const purchased = Math.random() < purchaseProb;
+
+  const chatCount = cfg.level === 'L0' ? 0 : (cfg.level === 'L1' ? Math.ceil(Math.random() * 2) : (Math.random() < 0.7 ? Math.ceil(Math.random() * 3) : 0));
+  const duration = Math.round(180 + Math.random() * 300 + (isNotebook ? 60 : 0));
+
+  return {
+    group, product: cfg.product, level: cfg.level, aiStage: cfg.aiStage || 'none',
+    involvement, control, confidence, satisfaction,
+    purchased, chatCount, duration,
+  };
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function runSimulation() {
+  if (simRunning) return;
+  simRunning = true;
+  participants = [];
+
+  document.getElementById('status-badge').className = 'status-badge running';
+  document.getElementById('status-badge').textContent = '실행 중';
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('sim-progress').classList.add('show');
+  document.getElementById('live-feed').classList.add('show');
+  document.getElementById('feed-container').innerHTML = '';
+  document.getElementById('btn-export').style.display = 'none';
+
+  const startTime = Date.now();
+  const groupKeys = Object.keys(GROUP_CONFIG);
+  const perGroup = Math.floor(TOTAL_N / 14);
+  const extras = TOTAL_N - perGroup * 14;
+
+  let queue = [];
+  groupKeys.forEach((gk, gi) => {
+    const n = perGroup + (gi < extras ? 1 : 0);
+    for (let i = 0; i < n; i++) queue.push(gk);
+  });
+  // shuffle
+  for (let i = queue.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [queue[i], queue[j]] = [queue[j], queue[i]]; }
+
+  for (let i = 0; i < queue.length; i++) {
+    const p = generateParticipant(queue[i]);
+    participants.push(p);
+
+    const pct = ((i + 1) / TOTAL_N * 100).toFixed(1);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-count').textContent = `${i + 1} / ${TOTAL_N}`;
+    document.getElementById('progress-group').textContent = `그룹: ${queue[i]}`;
+    document.getElementById('progress-product').textContent = `상품: ${p.product === 'detergent' ? '세탁세제' : '노트북'}`;
+    document.getElementById('progress-elapsed').textContent = `경과: ${((Date.now() - startTime) / 1000).toFixed(1)}s`;
+
+    if (i % 5 === 0) addFeedEntry(p, i + 1);
+    if (i % 20 === 0 || i === queue.length - 1) { updateKPIs(); updateCharts(); }
+
+    if (simSpeed > 0) await sleep(simSpeed);
+  }
+
+  updateKPIs();
+  updateCharts();
+  updateGroupTable();
+  updateCellMatrices();
+  runANOVA();
+  runPostHoc();
+  updatePurchaseTable();
+
+  simRunning = false;
+  document.getElementById('status-badge').className = 'status-badge done';
+  document.getElementById('status-badge').textContent = `완료 (N=${participants.length})`;
+  document.getElementById('btn-run').disabled = false;
+  document.getElementById('btn-export').style.display = 'block';
+}
+
+function addFeedEntry(p, idx) {
+  const container = document.getElementById('feed-container');
+  const entry = document.createElement('div');
+  entry.className = 'feed-entry';
+  const sat = mean(p.satisfaction);
+  entry.innerHTML = `
+    <span class="feed-id">P${String(idx).padStart(3,'0')}</span>
+    <span class="feed-group">${p.group}</span>
+    <span class="feed-score">통제=${mean(p.control).toFixed(1)} 확신=${mean(p.confidence).toFixed(1)} 만족=${sat.toFixed(1)} ${p.purchased ? '✅' : '❌'}</span>
+  `;
+  container.insertBefore(entry, container.firstChild);
+  if (container.children.length > 25) container.removeChild(container.lastChild);
+}
+
+function getFilteredData() {
+  if (currentTab === 'all') return participants;
+  return participants.filter(p => p.product === currentTab);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.product-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  if (participants.length > 0) { updateKPIs(); updateCharts(); }
+}
+
+function mean(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; }
+function std(arr) { if (arr.length < 2) return 0; const m = mean(arr); return Math.sqrt(arr.reduce((s, v) => s + (v - m) ** 2, 0) / (arr.length - 1)); }
+function getMean3(p, key) { return mean(p[key]); }
+
+function updateKPIs() {
+  const data = getFilteredData();
+  const n = data.length;
+  document.getElementById('kpi-n').textContent = n;
+  document.getElementById('kpi-n-bar').style.width = (n / TOTAL_N * 100) + '%';
+  if (!n) return;
+
+  const avgInv = mean(data.map(p => getMean3(p, 'involvement')));
+  const avgCtrl = mean(data.map(p => getMean3(p, 'control')));
+  const avgConf = mean(data.map(p => getMean3(p, 'confidence')));
+  const avgSat = mean(data.map(p => getMean3(p, 'satisfaction')));
+
+  document.getElementById('kpi-inv').textContent = avgInv.toFixed(2);
+  document.getElementById('kpi-ctrl').textContent = avgCtrl.toFixed(2);
+  document.getElementById('kpi-conf').textContent = avgConf.toFixed(2);
+  document.getElementById('kpi-sat').textContent = avgSat.toFixed(2);
+  document.getElementById('kpi-inv-bar').style.width = (avgInv / 7 * 100) + '%';
+  document.getElementById('kpi-ctrl-bar').style.width = (avgCtrl / 7 * 100) + '%';
+  document.getElementById('kpi-conf-bar').style.width = (avgConf / 7 * 100) + '%';
+  document.getElementById('kpi-sat-bar').style.width = (avgSat / 7 * 100) + '%';
+}
+
+function updateCharts() {
+  const data = getFilteredData();
+  if (data.length < 14) return;
+
+  // Interaction chart: level lines across stages (satisfaction)
+  const interData = {};
+  LEVELS.forEach(l => {
+    interData[l] = STAGES.map(s => {
+      const d = data.filter(p => p.level === l && (p.aiStage === s || (l === 'L0' && s !== null)));
+      if (l === 'L0') {
+        const d0 = data.filter(p => p.level === 'L0');
+        return d0.length ? mean(d0.map(p => getMean3(p, 'satisfaction'))) : 0;
+      }
+      const filtered = data.filter(p => p.level === l && p.aiStage === s);
+      return filtered.length ? mean(filtered.map(p => getMean3(p, 'satisfaction'))) : 0;
+    });
+  });
+
+  if (charts.interaction) charts.interaction.destroy();
+  charts.interaction = new Chart(document.getElementById('chart-interaction'), {
+    type: 'line',
+    data: {
+      labels: ['탐색 (S0)', '고려 (S1)', '구매결정 (S2)'],
+      datasets: [
+        { label: 'L0 없음', data: interData.L0, borderColor: '#6b7280', backgroundColor: 'rgba(107,114,128,0.1)', borderWidth: 2, pointRadius: 5, borderDash: [5,5], tension: 0.3 },
+        { label: 'L1 반응적', data: interData.L1, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', borderWidth: 3, pointRadius: 6, tension: 0.3 },
+        { label: 'L2 선제적', data: interData.L2, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 3, pointRadius: 6, tension: 0.3 },
+      ]
+    },
+    options: chartOpts('구매 만족도 (7점)')
+  });
+
+  // Level chart
+  const levelMeans = LEVELS.map(l => {
+    const d = data.filter(p => p.level === l);
+    return {
+      ctrl: mean(d.map(p => getMean3(p, 'control'))),
+      conf: mean(d.map(p => getMean3(p, 'confidence'))),
+      sat: mean(d.map(p => getMean3(p, 'satisfaction'))),
+    };
+  });
+  if (charts.level) charts.level.destroy();
+  charts.level = new Chart(document.getElementById('chart-level'), {
+    type: 'bar',
+    data: {
+      labels: ['L0 없음', 'L1 반응적', 'L2 선제적'],
+      datasets: [
+        { label: '통제감', data: levelMeans.map(m => m.ctrl), backgroundColor: 'rgba(124,58,237,0.7)', borderRadius: 4 },
+        { label: '확신', data: levelMeans.map(m => m.conf), backgroundColor: 'rgba(59,130,246,0.7)', borderRadius: 4 },
+        { label: '만족도', data: levelMeans.map(m => m.sat), backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 4 },
+      ]
+    },
+    options: chartOpts()
+  });
+
+  // Stage chart (L1+L2 only, since L0 has no stage)
+  const aiData = data.filter(p => p.level !== 'L0');
+  const stageMeans = STAGES.map(s => {
+    const d = aiData.filter(p => p.aiStage === s);
+    return {
+      ctrl: mean(d.map(p => getMean3(p, 'control'))),
+      conf: mean(d.map(p => getMean3(p, 'confidence'))),
+      sat: mean(d.map(p => getMean3(p, 'satisfaction'))),
+    };
+  });
+  if (charts.stage) charts.stage.destroy();
+  charts.stage = new Chart(document.getElementById('chart-stage'), {
+    type: 'bar',
+    data: {
+      labels: ['S0 탐색', 'S1 고려', 'S2 구매결정'],
+      datasets: [
+        { label: '통제감', data: stageMeans.map(m => m.ctrl), backgroundColor: 'rgba(124,58,237,0.7)', borderRadius: 4 },
+        { label: '확신', data: stageMeans.map(m => m.conf), backgroundColor: 'rgba(59,130,246,0.7)', borderRadius: 4 },
+        { label: '만족도', data: stageMeans.map(m => m.sat), backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 4 },
+      ]
+    },
+    options: chartOpts()
+  });
+
+  // Product moderation chart (control by level)
+  const detData = participants.filter(p => p.product === 'detergent');
+  const nbData = participants.filter(p => p.product === 'notebook');
+  const detByLevel = LEVELS.map(l => { const d = detData.filter(p => p.level === l); return d.length ? mean(d.map(p => getMean3(p, 'control'))) : 0; });
+  const nbByLevel = LEVELS.map(l => { const d = nbData.filter(p => p.level === l); return d.length ? mean(d.map(p => getMean3(p, 'control'))) : 0; });
+
+  if (charts.product) charts.product.destroy();
+  charts.product = new Chart(document.getElementById('chart-product'), {
+    type: 'line',
+    data: {
+      labels: ['L0 없음', 'L1 반응적', 'L2 선제적'],
+      datasets: [
+        { label: '🧴 세탁세제 (저관여)', data: detByLevel, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', borderWidth: 3, pointRadius: 6, tension: 0.3 },
+        { label: '💻 노트북 (고관여)', data: nbByLevel, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 3, pointRadius: 6, tension: 0.3 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      scales: { y: { min: 2.5, max: 7, title: { display: true, text: '지각된 통제감', color: '#888' }, ticks: { color: '#888' }, grid: { color: '#2a2a4a' } }, x: { ticks: { color: '#888' }, grid: { color: '#2a2a4a' } } },
+      plugins: { legend: { labels: { color: '#ccc' } } }
+    }
+  });
+}
+
+function chartOpts(yLabel) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      y: { min: 2, max: 7, title: yLabel ? { display: true, text: yLabel, color: '#888' } : undefined, ticks: { color: '#888' }, grid: { color: '#2a2a4a' } },
+      x: { ticks: { color: '#888' }, grid: { color: '#2a2a4a' } }
+    },
+    plugins: { legend: { labels: { color: '#ccc' } } }
+  };
+}
+
+function updateGroupTable() {
+  const tbody = document.getElementById('group-table-body');
+  const groupKeys = Object.keys(GROUP_CONFIG);
+  tbody.innerHTML = groupKeys.map(gk => {
+    const cfg = GROUP_CONFIG[gk];
+    const gd = participants.filter(p => p.group === gk);
+    const n = gd.length;
+    if (!n) return '';
+    const ctrl = mean(gd.map(p => getMean3(p, 'control'))).toFixed(2);
+    const conf = mean(gd.map(p => getMean3(p, 'confidence'))).toFixed(2);
+    const sat = mean(gd.map(p => getMean3(p, 'satisfaction'))).toFixed(2);
+    const pRate = (gd.filter(p => p.purchased).length / n * 100).toFixed(0);
+    const prodBadge = cfg.product === 'detergent' ? '<span class="badge badge-det">세탁세제</span>' : '<span class="badge badge-note">노트북</span>';
+    const lvlBadge = `<span class="badge badge-${cfg.level.toLowerCase()}">${LEVEL_LABELS[cfg.level]}</span>`;
+    const stageLabel = cfg.aiStage ? STAGE_LABELS[cfg.aiStage] : '—';
+    return `<tr><td>${gk}</td><td>${prodBadge}</td><td>${lvlBadge}</td><td>${stageLabel}</td><td>${n}</td><td>${ctrl}</td><td>${conf}</td><td>${sat}</td><td>${pRate}%</td></tr>`;
+  }).join('');
+}
+
+function updateCellMatrices() {
+  ['det', 'nb'].forEach(prefix => {
+    const prod = prefix === 'det' ? 'detergent' : 'notebook';
+    STAGES.forEach(s => {
+      LEVELS.forEach(l => {
+        const cell = document.getElementById(`cell-${prefix}-${s}-${l}`);
+        let d;
+        if (l === 'L0') {
+          d = participants.filter(p => p.product === prod && p.level === 'L0');
+        } else {
+          d = participants.filter(p => p.product === prod && p.level === l && p.aiStage === s);
+        }
+        const n = d.length;
+        const nEl = cell.querySelector('.cell-n');
+        const mEl = cell.querySelector('.cell-mean');
+        if (!n) { nEl.textContent = '—'; mEl.textContent = '—'; return; }
+        const vals = d.map(p => getMean3(p, 'satisfaction'));
+        const m = mean(vals);
+        const sd = std(vals);
+        nEl.textContent = `n=${n}`;
+        mEl.textContent = m.toFixed(2);
+        let sdEl = cell.querySelector('.cell-sd');
+        if (!sdEl) { sdEl = document.createElement('div'); sdEl.className = 'cell-sd'; cell.appendChild(sdEl); }
+        sdEl.textContent = `SD=${sd.toFixed(2)}`;
+      });
+    });
+  });
+}
+
+function runANOVA() {
+  const n = participants.length;
+  if (n < 30) return;
+
+  const grandMean = mean(participants.map(p => getMean3(p, 'satisfaction')));
+
+  let ssLevel = 0;
+  LEVELS.forEach(l => { const d = participants.filter(p => p.level === l); const m = mean(d.map(p => getMean3(p, 'satisfaction'))); ssLevel += d.length * (m - grandMean) ** 2; });
+
+  // For stage, only L1+L2 participants have a stage
+  const aiParticipants = participants.filter(p => p.level !== 'L0');
+  const aiGrandMean = mean(aiParticipants.map(p => getMean3(p, 'satisfaction')));
+  let ssStage = 0;
+  STAGES.forEach(s => { const d = aiParticipants.filter(p => p.aiStage === s); if (!d.length) return; const m = mean(d.map(p => getMean3(p, 'satisfaction'))); ssStage += d.length * (m - aiGrandMean) ** 2; });
+
+  let ssProduct = 0;
+  ['detergent', 'notebook'].forEach(prod => { const d = participants.filter(p => p.product === prod); const m = mean(d.map(p => getMean3(p, 'satisfaction'))); ssProduct += d.length * (m - grandMean) ** 2; });
+
+  let ssInteraction = 0;
+  LEVELS.filter(l => l !== 'L0').forEach(l => {
+    STAGES.forEach(s => {
+      const d = participants.filter(p => p.level === l && p.aiStage === s);
+      if (!d.length) return;
+      const cellMean = mean(d.map(p => getMean3(p, 'satisfaction')));
+      const levelMean = mean(participants.filter(p => p.level === l).map(p => getMean3(p, 'satisfaction')));
+      const stageMean = mean(aiParticipants.filter(p => p.aiStage === s).map(p => getMean3(p, 'satisfaction')));
+      ssInteraction += d.length * (cellMean - levelMean - stageMean + aiGrandMean) ** 2;
+    });
+  });
+
+  const ssTotal = participants.reduce((s, p) => s + (getMean3(p, 'satisfaction') - grandMean) ** 2, 0);
+  const ssError = Math.max(ssTotal - ssLevel - ssStage - ssProduct - ssInteraction, 1);
+
+  const dfLevel = 2, dfStage = 2, dfProduct = 1, dfInteraction = 4;
+  const dfError = n - dfLevel - dfStage - dfProduct - dfInteraction - 1;
+
+  const msLevel = ssLevel / dfLevel;
+  const msStage = ssStage / dfStage;
+  const msProduct = ssProduct / dfProduct;
+  const msInteraction = ssInteraction / dfInteraction;
+  const msError = ssError / dfError;
+
+  const fLevel = msLevel / msError;
+  const fStage = msStage / msError;
+  const fProduct = msProduct / msError;
+  const fInteraction = msInteraction / msError;
+
+  const pLevel = fToP(fLevel, dfLevel, dfError);
+  const pStage = fToP(fStage, dfStage, dfError);
+  const pProduct = fToP(fProduct, dfProduct, dfError);
+  const pInteraction = fToP(fInteraction, dfInteraction, dfError);
+
+  document.getElementById('anova-body').innerHTML = `
+    <tr><td>AI 수준 (L0/L1/L2)</td><td>${ssLevel.toFixed(2)}</td><td>${dfLevel}</td><td>${msLevel.toFixed(2)}</td><td>${fLevel.toFixed(2)}</td><td class="${pLevel<0.05?'sig':'not-sig'}">${formatP(pLevel)}</td><td>${(ssLevel/(ssLevel+ssError)).toFixed(3)}</td><td class="${pLevel<0.05?'sig':'not-sig'}">${stars(pLevel)}</td></tr>
+    <tr><td>개입 단계 (S0/S1/S2)</td><td>${ssStage.toFixed(2)}</td><td>${dfStage}</td><td>${msStage.toFixed(2)}</td><td>${fStage.toFixed(2)}</td><td class="${pStage<0.05?'sig':'not-sig'}">${formatP(pStage)}</td><td>${(ssStage/(ssStage+ssError)).toFixed(3)}</td><td class="${pStage<0.05?'sig':'not-sig'}">${stars(pStage)}</td></tr>
+    <tr><td>제품 (세탁세제/노트북)</td><td>${ssProduct.toFixed(2)}</td><td>${dfProduct}</td><td>${msProduct.toFixed(2)}</td><td>${fProduct.toFixed(2)}</td><td class="${pProduct<0.05?'sig':'not-sig'}">${formatP(pProduct)}</td><td>${(ssProduct/(ssProduct+ssError)).toFixed(3)}</td><td class="${pProduct<0.05?'sig':'not-sig'}">${stars(pProduct)}</td></tr>
+    <tr><td>수준 × 단계</td><td>${ssInteraction.toFixed(2)}</td><td>${dfInteraction}</td><td>${msInteraction.toFixed(2)}</td><td>${fInteraction.toFixed(2)}</td><td class="${pInteraction<0.05?'sig':'not-sig'}">${formatP(pInteraction)}</td><td>${(ssInteraction/(ssInteraction+ssError)).toFixed(3)}</td><td class="${pInteraction<0.05?'sig':'not-sig'}">${stars(pInteraction)}</td></tr>
+    <tr><td>오차</td><td>${ssError.toFixed(2)}</td><td>${dfError}</td><td>${msError.toFixed(2)}</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="border-top:2px solid #3a3a5a;"><td><strong>전체</strong></td><td>${ssTotal.toFixed(2)}</td><td>${n-1}</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+  `;
+}
+
+function runPostHoc() {
+  if (participants.length < 30) return;
+  const comparisons = [];
+  for (let i = 0; i < LEVELS.length; i++) {
+    for (let j = i + 1; j < LEVELS.length; j++) {
+      const d1 = participants.filter(p => p.level === LEVELS[i]);
+      const d2 = participants.filter(p => p.level === LEVELS[j]);
+      const v1 = d1.map(p => getMean3(p, 'satisfaction'));
+      const v2 = d2.map(p => getMean3(p, 'satisfaction'));
+      const m1 = mean(v1), m2 = mean(v2);
+      const diff = m2 - m1;
+      const pooledSD = Math.sqrt(((d1.length-1)*variance(v1)+(d2.length-1)*variance(v2))/(d1.length+d2.length-2));
+      const se = pooledSD * Math.sqrt(1/d1.length + 1/d2.length);
+      const t = diff / (se || 0.001);
+      const p = Math.min(1, tToP(Math.abs(t), d1.length+d2.length-2) * 3);
+      comparisons.push({ pair: `${LEVEL_LABELS[LEVELS[i]]} vs ${LEVEL_LABELS[LEVELS[j]]}`, diff: diff.toFixed(3), p, sig: p < 0.05 });
+    }
+  }
+  document.getElementById('posthoc-body').innerHTML = comparisons.map(c =>
+    `<tr><td>${c.pair}</td><td>${c.diff}</td><td class="${c.sig?'sig':'not-sig'}">${formatP(c.p)}</td><td class="${c.sig?'sig':'not-sig'}">${c.sig?'유의*':'비유의'}</td></tr>`
+  ).join('');
+}
+
+function updatePurchaseTable() {
+  const rows = LEVELS.map(l => {
+    const d = participants.filter(p => p.level === l);
+    const purchased = d.filter(p => p.purchased).length;
+    return `<tr><td>${LEVEL_LABELS[l]}</td><td>${d.length}</td><td>${purchased}</td><td>${(purchased/d.length*100).toFixed(1)}%</td></tr>`;
+  });
+  rows.push('<tr style="border-top:2px solid #3a3a5a;"><td><strong>전체</strong></td><td>' + participants.length + '</td><td>' + participants.filter(p=>p.purchased).length + '</td><td>' + (participants.filter(p=>p.purchased).length/participants.length*100).toFixed(1) + '%</td></tr>');
+  document.getElementById('purchase-body').innerHTML = rows.join('');
+}
+
+function variance(arr) { const m = mean(arr); return arr.reduce((s, v) => s + (v - m) ** 2, 0) / (arr.length - 1 || 1); }
+function fToP(f, df1, df2) { if (f <= 0) return 1; const x = df2 / (df2 + df1 * f); return incompleteBeta(x, df2/2, df1/2); }
+function tToP(t, df) { const x = df / (df + t*t); return incompleteBeta(x, df/2, 0.5); }
+function incompleteBeta(x, a, b) { if (x >= 1) return 0; if (x <= 0) return 1; const lnBeta = lnGamma(a)+lnGamma(b)-lnGamma(a+b); const bt = Math.exp(Math.log(x)*a+Math.log(1-x)*b-lnBeta); if (x < (a+1)/(a+b+2)) return bt*betaCF(x,a,b)/a; return 1-bt*betaCF(1-x,b,a)/b; }
+function betaCF(x,a,b) { let d=1-(a+b)*x/(a+1); if(Math.abs(d)<1e-30)d=1e-30; d=1/d; let h=d,c=1; for(let m=1;m<=100;m++){ let m2=2*m,aa=m*(b-m)*x/((a+m2-1)*(a+m2)); d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/(c||1e-30);if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c; aa=-(a+m)*(a+b+m)*x/((a+m2)*(a+m2+1)); d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/(c||1e-30);if(Math.abs(c)<1e-30)c=1e-30;d=1/d;let del=d*c;h*=del; if(Math.abs(del-1)<1e-8)break; } return h; }
+function lnGamma(z) { const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.001208650973866179,-0.000005395239384953]; let x=z,y=z,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015; for(let j=0;j<6;j++)ser+=c[j]/++y;return-tmp+Math.log(2.5066282746310005*ser/x); }
+function formatP(p) { return p < 0.001 ? '< .001' : p.toFixed(3); }
+function stars(p) { return p < 0.001 ? '***' : p < 0.01 ? '**' : p < 0.05 ? '*' : '비유의'; }
+
+function setSpeed(ms) {
+  simSpeed = ms;
+  document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`speed-${ms}`).classList.add('active');
+}
+
+function resetSimulation() {
+  participants = [];
+  simRunning = false;
+  currentTab = 'all';
+  document.getElementById('status-badge').className = 'status-badge ready';
+  document.getElementById('status-badge').textContent = '준비';
+  document.getElementById('btn-run').disabled = false;
+  document.getElementById('sim-progress').classList.remove('show');
+  document.getElementById('live-feed').classList.remove('show');
+  document.getElementById('btn-export').style.display = 'none';
+  ['kpi-n','kpi-inv','kpi-ctrl','kpi-conf','kpi-sat'].forEach(id => document.getElementById(id).textContent = id === 'kpi-n' ? '0' : '—');
+  ['kpi-n-bar','kpi-inv-bar','kpi-ctrl-bar','kpi-conf-bar','kpi-sat-bar'].forEach(id => document.getElementById(id).style.width = '0%');
+  document.getElementById('anova-body').innerHTML = '<tr><td colspan="8" style="color:#666;text-align:center;padding:20px;">시뮬레이션을 실행하면 결과가 표시됩니다</td></tr>';
+  document.getElementById('posthoc-body').innerHTML = '<tr><td colspan="4" style="color:#666;text-align:center;padding:20px;">—</td></tr>';
+  document.getElementById('purchase-body').innerHTML = '<tr><td colspan="4" style="color:#666;text-align:center;padding:20px;">—</td></tr>';
+  document.getElementById('group-table-body').innerHTML = '';
+  document.querySelectorAll('.product-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-all').classList.add('active');
+  ['det','nb'].forEach(prefix => STAGES.forEach(s => LEVELS.forEach(l => {
+    const cell = document.getElementById(`cell-${prefix}-${s}-${l}`);
+    if (cell) { cell.querySelector('.cell-n').textContent = '—'; cell.querySelector('.cell-mean').textContent = '—'; const sd = cell.querySelector('.cell-sd'); if (sd) sd.remove(); }
+  })));
+  Object.values(charts).forEach(c => { if(c) c.destroy(); });
+  charts = {};
+}
+
+function exportCSV() {
+  if (!participants.length) return;
+  const headers = ['group','product','level','aiStage','involvement_1','involvement_2','involvement_3','control_1','control_2','control_3','confidence_1','confidence_2','confidence_3','satisfaction_1','satisfaction_2','satisfaction_3','purchased','chatCount','duration'];
+  let csv = headers.join(',') + '\n';
+  participants.forEach(p => {
+    csv += [p.group, p.product, p.level, p.aiStage, ...p.involvement, ...p.control, ...p.confidence, ...p.satisfaction, p.purchased, p.chatCount, p.duration].join(',') + '\n';
+  });
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `simulation_N${participants.length}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

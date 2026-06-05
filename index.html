@@ -1533,78 +1533,118 @@ async function submitSurvey() {
 async function saveToGitHub(result) {
   const GITHUB_TOKEN = localStorage.getItem('gh_token');
   const REPO = 'jylunabyul/fact_check';
+  const API = `https://api.github.com/repos/${REPO}/contents`;
 
-  const title = `[실험결과] ${result.pid} | ${result.group} | ${result.product} | ${result.purchased ? '구매' : '미구매'}`;
-  const body = `## 실험 결과 데이터
+  if (!GITHUB_TOKEN) {
+    console.warn('GitHub token 없음 — localStorage에 gh_token 키로 저장해주세요.');
+    alert('설문이 제출되었습니다. (GitHub 토큰 미설정 → 로컬 저장만)\n\n콘솔에서 결과 JSON을 확인하세요.');
+    return;
+  }
+
+  const headers = { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' };
+  const ts = result.submittedAt.replace(/[:.]/g, '-').slice(0, 19);
+  const safeName = result.pid.replace(/[^가-힣a-zA-Z0-9]/g, '_');
+
+  // 1) 개별 Markdown 파일 저장
+  const mdFilename = `responses/${ts}_${safeName}_${result.group}.md`;
+  const mdContent = `# 실험 결과 — ${result.pid}
 
 | 항목 | 값 |
 |------|-----|
-| 참가자 ID | ${result.pid} |
+| 이름 | ${result.pid} |
 | 그룹 | ${result.group} |
 | 제품 | ${result.product === 'detergent' ? '세탁세제' : '노트북'} |
 | AI 수준 | ${result.level} |
 | AI 단계 | ${result.aiStage || '없음'} |
 | 선택 제품 | ${result.selectedProduct || '없음'} |
-| 구매 여부 | ${result.purchased ? '✅ 구매' : '❌ 미구매'} |
+| 구매 여부 | ${result.purchased ? '구매' : '미구매'} |
 | 챗봇 질문 수 | ${result.chatCount} |
 | 소요 시간 | ${Math.round(result.totalTime / 1000)}초 |
 | 제출 시각 | ${result.submittedAt} |
 
-### 설문 응답
-| 문항 | 응답 |
-|------|------|
-| 관여도 1 (중요성) | ${result.surveyResponses.involvement_1} |
-| 관여도 2 (관련성) | ${result.surveyResponses.involvement_2} |
-| 관여도 3 (가치) | ${result.surveyResponses.involvement_3} |
-| 통제감 1 | ${result.surveyResponses.control_1} |
-| 통제감 2 | ${result.surveyResponses.control_2} |
-| 통제감 3 (R) | ${result.surveyResponses.control_3} |
-| 확신 1 | ${result.surveyResponses.confidence_1} |
-| 확신 2 | ${result.surveyResponses.confidence_2} |
-| 확신 3 | ${result.surveyResponses.confidence_3} |
-| 만족도 1 | ${result.surveyResponses.satisfaction_1} |
-| 만족도 2 | ${result.surveyResponses.satisfaction_2} |
-| 만족도 3 | ${result.surveyResponses.satisfaction_3} |
+## 설문 응답
 
-### Raw JSON
+| 문항 | 응답 (7점) |
+|------|------|
+| 관여도1 (중요성) | ${result.surveyResponses.involvement_1} |
+| 관여도2 (관련성) | ${result.surveyResponses.involvement_2} |
+| 관여도3 (가치) | ${result.surveyResponses.involvement_3} |
+| 통제감1 | ${result.surveyResponses.control_1} |
+| 통제감2 | ${result.surveyResponses.control_2} |
+| 통제감3 (R) | ${result.surveyResponses.control_3} |
+| 확신1 | ${result.surveyResponses.confidence_1} |
+| 확신2 | ${result.surveyResponses.confidence_2} |
+| 확신3 | ${result.surveyResponses.confidence_3} |
+| 만족도1 | ${result.surveyResponses.satisfaction_1} |
+| 만족도2 | ${result.surveyResponses.satisfaction_2} |
+| 만족도3 | ${result.surveyResponses.satisfaction_3} |
+
+## Raw JSON
+
 \`\`\`json
 ${JSON.stringify(result, null, 2)}
 \`\`\`
 `;
 
-  if (!GITHUB_TOKEN) {
-    console.warn('GitHub token 없음 — localStorage에 gh_token 키로 저장해주세요.');
-    console.log('대안: 아래 JSON을 수동으로 복사하세요.');
-    alert('설문이 제출되었습니다. (GitHub 토큰이 설정되지 않아 로컬에만 저장됩니다)\n\n콘솔에서 결과 JSON을 확인하세요.');
-    return;
-  }
+  try {
+    await fetch(`${API}/${mdFilename}`, {
+      method: 'PUT', headers,
+      body: JSON.stringify({ message: `data: ${result.pid} (${result.group})`, content: btoa(unescape(encodeURIComponent(mdContent))) }),
+    });
+    console.log(`Markdown 저장 완료: ${mdFilename}`);
+  } catch (e) { console.error('MD 저장 실패:', e); }
+
+  // 2) CSV 누적 저장
+  const CSV_PATH = 'data/results.csv';
+  const CSV_HEADER = 'timestamp,name,group,product,level,ai_stage,selected_product,purchased,chat_count,duration_sec,involvement_1,involvement_2,involvement_3,control_1,control_2,control_3,confidence_1,confidence_2,confidence_3,satisfaction_1,satisfaction_2,satisfaction_3';
+  const csvRow = [
+    result.submittedAt,
+    result.pid,
+    result.group,
+    result.product,
+    result.level,
+    result.aiStage || 'none',
+    result.selectedProduct || 'none',
+    result.purchased,
+    result.chatCount,
+    Math.round(result.totalTime / 1000),
+    result.surveyResponses.involvement_1,
+    result.surveyResponses.involvement_2,
+    result.surveyResponses.involvement_3,
+    result.surveyResponses.control_1,
+    result.surveyResponses.control_2,
+    result.surveyResponses.control_3,
+    result.surveyResponses.confidence_1,
+    result.surveyResponses.confidence_2,
+    result.surveyResponses.confidence_3,
+    result.surveyResponses.satisfaction_1,
+    result.surveyResponses.satisfaction_2,
+    result.surveyResponses.satisfaction_3,
+  ].join(',');
 
   try {
-    const res = await fetch(`https://api.github.com/repos/${REPO}/issues`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
+    let existingCsv = CSV_HEADER + '\n';
+    let sha = null;
+
+    const getRes = await fetch(`${API}/${CSV_PATH}`, { headers });
+    if (getRes.ok) {
+      const fileData = await getRes.json();
+      sha = fileData.sha;
+      existingCsv = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+    }
+
+    const newCsv = existingCsv.trimEnd() + '\n' + csvRow + '\n';
+
+    await fetch(`${API}/${CSV_PATH}`, {
+      method: 'PUT', headers,
       body: JSON.stringify({
-        title: title,
-        body: body,
-        labels: ['experiment-data', result.group, result.level],
+        message: `data: add ${result.pid} (${result.group}) to CSV`,
+        content: btoa(unescape(encodeURIComponent(newCsv))),
+        ...(sha ? { sha } : {}),
       }),
     });
-
-    if (res.ok) {
-      const issue = await res.json();
-      console.log(`GitHub Issue 생성 완료: ${issue.html_url}`);
-    } else {
-      const err = await res.text();
-      console.error('GitHub Issue 생성 실패:', err);
-      alert('GitHub 저장 실패. 콘솔의 JSON 데이터를 수동 복사해주세요.');
-    }
-  } catch (e) {
-    console.error('네트워크 오류:', e);
-    alert('네트워크 오류. 콘솔의 JSON 데이터를 수동 복사해주세요.');
-  }
+    console.log('CSV 업데이트 완료');
+  } catch (e) { console.error('CSV 저장 실패:', e); }
 }
 
 // ===== UTILS =====

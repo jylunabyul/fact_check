@@ -228,115 +228,59 @@ body {
 }
 .btn-skip:hover { background: #eee; }
 
-/* AI Activity Banner */
-.ai-banner {
-  position: fixed; top: 56px; left: 0; right: 0; height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
-  background-size: 200% 100%;
-  animation: bannerShimmer 3s ease infinite;
-  display: none; align-items: center; justify-content: center; gap: 10px;
-  z-index: 999; box-shadow: 0 4px 16px rgba(118,75,162,0.3);
+/* AI Inline Recommendation Card */
+.ai-inline-card {
+  background: #fff; border: 2px solid #764ba2; border-radius: 16px;
+  padding: 20px 24px; margin: 20px 0;
+  box-shadow: 0 4px 20px rgba(118,75,162,0.15);
+  animation: aiCardIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: none;
 }
-.ai-banner.show { display: flex; }
-@keyframes bannerShimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-.ai-banner .ai-banner-icon { font-size: 1.2rem; animation: bannerPulse 1.5s ease infinite; }
-@keyframes bannerPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-.ai-banner .ai-banner-text { color: #fff; font-size: 0.85rem; font-weight: 700; }
-.ai-banner .ai-banner-badge {
-  background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
-  border-radius: 20px; padding: 4px 12px; font-size: 0.7rem; color: #fff; font-weight: 600;
-}
+.ai-inline-card.show { display: block; }
+@keyframes aiCardIn { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* AI Elements */
-.ai-fab {
-  position: fixed; bottom: 24px; right: 24px; width: 64px; height: 64px;
-  border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2);
-  color: #fff; border: none; box-shadow: 0 4px 20px rgba(118,75,162,0.5);
-  font-size: 1.6rem; cursor: pointer; display: none; align-items: center;
-  justify-content: center; z-index: 900; transition: transform 0.2s;
+.ai-inline-card .ai-card-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  padding-bottom: 12px; border-bottom: 1px solid #f0e6ff;
 }
-.ai-fab:hover { transform: scale(1.1); }
-.ai-fab.show { display: flex; }
-.ai-fab.show:not(.disabled) { animation: fabPulse 2s ease infinite; }
-@keyframes fabPulse {
-  0% { box-shadow: 0 4px 20px rgba(118,75,162,0.5); }
-  50% { box-shadow: 0 4px 40px rgba(118,75,162,0.8), 0 0 0 12px rgba(118,75,162,0.15); }
-  100% { box-shadow: 0 4px 20px rgba(118,75,162,0.5); }
-}
-.ai-fab.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; animation: none; }
-
-.ai-fab-label {
-  position: fixed; bottom: 96px; right: 16px; background: #fff;
-  border: 2px solid #764ba2; border-radius: 12px; padding: 12px 16px;
-  font-size: 0.82rem; color: #333; box-shadow: 0 4px 20px rgba(118,75,162,0.2);
-  display: none; max-width: 280px; z-index: 899; font-weight: 600;
-}
-.ai-fab-label::after {
-  content: ''; position: absolute; bottom: -8px; right: 30px;
-  width: 14px; height: 14px; background: #fff; border-right: 2px solid #764ba2;
-  border-bottom: 2px solid #764ba2; transform: rotate(45deg);
-}
-.ai-fab-label.show { display: block; animation: slideUp 0.4s ease; }
-
-.ai-disabled-label {
-  position: fixed; bottom: 96px; right: 16px; background: #fff8e1;
-  border: 1px solid #ffcc02; border-radius: 10px; padding: 10px 14px;
-  font-size: 0.75rem; color: #856404; box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-  display: none; max-width: 260px; z-index: 899;
-}
-.ai-disabled-label.show { display: block; }
-
-/* AI Proactive Popup */
-.ai-proactive {
-  position: fixed; bottom: 100px; right: 24px; background: #fff;
-  border: 2px solid #764ba2; border-radius: 20px; padding: 24px;
-  box-shadow: 0 12px 48px rgba(118,75,162,0.25); max-width: 380px; width: 90%;
-  z-index: 950; display: none; animation: proactiveIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.ai-proactive.show { display: block; }
-@keyframes proactiveIn { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-.ai-proactive .ai-avatar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.ai-proactive .ai-avatar-icon {
+.ai-inline-card .ai-card-icon {
   width: 36px; height: 36px; background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 0.8rem; color: #fff; font-weight: 700; animation: bannerPulse 2s ease infinite;
+  font-size: 1rem; flex-shrink: 0;
 }
-.ai-proactive .ai-avatar-name { font-size: 0.85rem; font-weight: 700; color: #764ba2; }
-.ai-proactive .ai-message {
-  font-size: 0.9rem; color: #333; line-height: 1.6; margin-bottom: 16px;
-  background: #f8f4ff; border-radius: 12px; padding: 14px 16px;
+.ai-inline-card .ai-card-title {
+  font-size: 0.85rem; font-weight: 700; color: #764ba2;
 }
-.ai-proactive .ai-choices { display: flex; flex-direction: column; gap: 10px; }
-.ai-proactive .ai-choice-btn {
-  padding: 12px 16px; border: 2px solid #e5e5e5; border-radius: 12px;
+.ai-inline-card .ai-card-badge {
+  margin-left: auto; background: #f0e6ff; border-radius: 20px;
+  padding: 4px 10px; font-size: 0.68rem; color: #764ba2; font-weight: 600;
+}
+
+.ai-inline-card .ai-card-message {
+  font-size: 0.9rem; color: #333; line-height: 1.7; margin-bottom: 16px;
+  background: #f8f4ff; border-radius: 12px; padding: 14px 18px;
+}
+
+.ai-inline-card .ai-card-choices {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ai-inline-card .ai-card-choice {
+  padding: 12px 16px; border: 2px solid #e8e0f0; border-radius: 12px;
   background: #fff; font-size: 0.85rem; color: #333; cursor: pointer;
   text-align: left; transition: all 0.2s; font-weight: 500;
 }
-.ai-proactive .ai-choice-btn:hover { background: #f0e6ff; border-color: #764ba2; transform: translateX(4px); }
+.ai-inline-card .ai-card-choice:hover {
+  background: #f0e6ff; border-color: #764ba2; transform: translateX(4px);
+}
 
-/* Chat Panel */
-.chat-panel {
-  position: fixed; bottom: 0; right: 0; width: 380px; height: 520px;
-  background: #fff; border-radius: 16px 16px 0 0; box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
-  display: none; flex-direction: column; z-index: 1000;
+.ai-inline-card .ai-card-response {
+  font-size: 0.88rem; color: #333; line-height: 1.7;
+  background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;
+  padding: 14px 18px; margin-top: 12px;
+  animation: aiCardIn 0.3s ease;
 }
-.chat-panel.show { display: flex; }
-.chat-header {
-  padding: 14px 18px; background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center;
-}
-.chat-header span { color: #fff; font-weight: 700; font-size: 0.88rem; }
-.chat-header button { background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
-.chat-messages { flex: 1; overflow-y: auto; padding: 16px; }
-.chat-msg { margin-bottom: 12px; max-width: 85%; }
-.chat-msg.ai { background: #f3f0ff; border-radius: 12px 12px 12px 4px; padding: 10px 14px; font-size: 0.82rem; color: #333; line-height: 1.5; }
-.chat-msg.user { background: #764ba2; color: #fff; border-radius: 12px 12px 4px 12px; padding: 10px 14px; font-size: 0.82rem; margin-left: auto; line-height: 1.5; }
-.chat-input-area { padding: 12px 14px; border-top: 1px solid #eee; display: flex; gap: 8px; }
-.chat-input-area input { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; outline: none; }
-.chat-input-area input:focus { border-color: #764ba2; }
-.chat-input-area button { padding: 10px 16px; background: #764ba2; color: #fff; border: none; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-.chat-counter {
-  padding: 4px 14px; background: #fff3cd; font-size: 0.7rem; color: #856404; text-align: center;
+.ai-inline-card .ai-card-response::before {
+  content: '🤖 AI: '; font-weight: 700; color: #764ba2;
 }
 
 /* Complete */
@@ -425,8 +369,7 @@ body {
 
 @media (max-width: 600px) {
   .product-grid { grid-template-columns: 1fr 1fr; }
-  .chat-panel { width: 100%; }
-  .ai-proactive { right: 12px; left: 12px; max-width: none; }
+  .ai-inline-card { margin: 16px 0; padding: 16px; }
 }
 </style>
 </head>
@@ -541,6 +484,9 @@ body {
         <button class="search-btn" onclick="doSearch()">검색</button>
       </div>
     </div>
+
+    <!-- AI 인라인 카드: 탐색 단계 -->
+    <div class="ai-inline-card" id="ai-card-S0"></div>
   </div>
 
   <!-- 고려 (상품 목록 + 상세) -->
@@ -565,6 +511,9 @@ body {
         <p id="pd-review-text"></p>
       </div>
     </div>
+
+    <!-- AI 인라인 카드: 고려 단계 -->
+    <div class="ai-inline-card" id="ai-card-S1"></div>
 
     <button class="btn-action" id="btn-add-cart" onclick="addToCart()">장바구니에 담기</button>
   </div>
@@ -598,6 +547,9 @@ body {
         <div class="cart-row" style="margin-top:8px; font-size:0.78rem; color:#764ba2; font-weight:600;"><span>결제 후 잔여 크레딧</span><span id="sum-remaining">—</span></div>
       </div>
     </div>
+    <!-- AI 인라인 카드: 구매결정 단계 -->
+    <div class="ai-inline-card" id="ai-card-S2"></div>
+
     <div class="purchase-buttons">
       <button class="btn-pay" onclick="doPurchase(true)">✅ 결제하기</button>
       <button class="btn-skip" onclick="doPurchase(false)">❌ 구매하지 않기</button>
@@ -605,41 +557,6 @@ body {
   </div>
 </div>
 
-<!-- AI Activity Banner -->
-<div class="ai-banner" id="ai-banner">
-  <span class="ai-banner-icon">🤖</span>
-  <span class="ai-banner-text" id="ai-banner-text">AI 쇼핑 도우미 활성화</span>
-  <span class="ai-banner-badge" id="ai-banner-badge">L1 반응적</span>
-</div>
-
-<!-- AI FAB (L1 반응적) -->
-<button class="ai-fab" id="ai-fab" onclick="openChat()">🤖</button>
-<div class="ai-fab-label" id="ai-fab-label"></div>
-<div class="ai-disabled-label" id="ai-disabled-label"></div>
-
-<!-- AI Proactive Popup (L2 선제적) -->
-<div class="ai-proactive" id="ai-proactive">
-  <div class="ai-avatar">
-    <div class="ai-avatar-icon">AI</div>
-    <div class="ai-avatar-name">쇼핑 도우미</div>
-  </div>
-  <div class="ai-message" id="ai-proactive-msg"></div>
-  <div class="ai-choices" id="ai-proactive-choices"></div>
-</div>
-
-<!-- Chat Panel (L1) -->
-<div class="chat-panel" id="chat-panel">
-  <div class="chat-header">
-    <span>AI 쇼핑 도우미</span>
-    <button onclick="closeChat()">✕</button>
-  </div>
-  <div class="chat-counter" id="chat-counter" style="display:none;"></div>
-  <div class="chat-messages" id="chat-messages"></div>
-  <div class="chat-input-area">
-    <input type="text" id="chat-input" placeholder="질문을 입력하세요..." onkeydown="if(event.key==='Enter')sendChat()">
-    <button onclick="sendChat()">전송</button>
-  </div>
-</div>
 
 <!-- Purchase Complete -->
 <div class="stage-complete" id="stage-complete">
@@ -957,50 +874,7 @@ const PRODUCTS = {
   ],
 };
 
-// ===== AI RESPONSES =====
-const AI_CHAT_RESPONSES = {
-  detergent: {
-    S0: [
-      { keywords: ['드럼'], response: '네! 드럼세탁기 전용 또는 겸용 제품으로 테크 드럼세탁기용 3L(11,200원)과 다우니 실내건조 2.1L(14,500원)이 있어요. 두 제품 중 어떤 기준으로 고르실지 도움드릴까요?' },
-      { keywords: ['향', '무향', '냄새'], response: '무향 제품으로는 아이깨끗해 아기전용 1.5L(16,800원)이 가장 많이 찾으세요. 피부 자극도 적어서 민감한 분들께 인기 있어요.' },
-      { keywords: ['추천', '인기', '많이'], response: '리뷰 수 기준으로는 다우니 실내건조(21,300개 리뷰)가 가장 인기 있고, 평점 기준으로는 아이깨끗해(4.9점)가 가장 높아요.' },
-      { keywords: ['가성비', '저렴', '싼'], response: '가성비로 보면 피죤 울샴푸 2L(9,800원)이 가장 저렴하고, 용량 대비로는 리큐 액체세제 3L(12,900원)이 좋아요.' },
-    ],
-    S1: [
-      { keywords: ['리큐', '다우니', '비교'], response: '리큐 액체세제는 3L 대용량으로 가성비가 좋고, 다우니 실내건조는 실내건조 냄새 제거에 특화되어 있어요. 실내건조를 자주 하신다면 다우니를, 용량 대비 가격이 중요하시면 리큐를 추천드려요.' },
-      { keywords: ['아기', '아이', '민감'], response: '아이깨끗해 아기전용 1.5L(16,800원)이 아기 옷에 가장 적합해요. 무형광·무향으로 피부 자극이 적고, 리뷰 평점도 4.9로 가장 높아요.' },
-      { keywords: ['성분', '형광', '안전'], response: '무형광 제품은 다우니 실내건조와 아이깨끗해 아기전용 두 가지예요. 피부 안전성을 최우선으로 하신다면 아이깨끗해를 추천드려요.' },
-    ],
-    S2: [
-      { keywords: ['배송', '언제', '도착'], response: '현재 재고 있고 오후 4시 이전 결제 시 오늘 밤 출고, 내일 오전 수령 가능해요.' },
-      { keywords: ['환불', '반품', '교환'], response: '네, 수령 후 30일 이내 미개봉 상태라면 무료 반품 가능해요.' },
-      { keywords: ['할인', '쿠폰', '세일'], response: '현재 이 제품은 별도 할인 없이 표시 가격 그대로예요. 로켓와우 회원이시면 무료배송 혜택이 있어요.' },
-    ],
-  },
-  notebook: {
-    S0: [
-      { keywords: ['영상', '편집', '디자인'], response: '영상 편집에는 높은 성능이 필요해서 삼성 갤럭시북4 Pro(i7/16GB, 1,690,000원) 또는 맥북에어 M3(1,590,000원)를 추천드려요. M3 칩은 영상 편집 최적화가 잘 되어 있어요.' },
-      { keywords: ['가벼', '경량', '휴대'], response: '150만원 이하 경량 노트북으로는 LG 그램 16(1.19kg, 1,490,000원)이 가장 가볍고 배터리도 오래가요. 레노버 씽크패드 E15(1,190,000원)도 합리적인 선택이에요.' },
-      { keywords: ['게임', '게이밍'], response: '게이밍용으로는 이 목록에서는 갤럭시북4 Pro(i7)가 가장 적합해요. 다만 전문 게이밍 노트북보다는 성능이 낮을 수 있어요.' },
-      { keywords: ['업무', '사무', '문서'], response: '업무용으로는 LG 그램 16(1,490,000원)을 추천드려요. 가볍고 배터리가 길어 이동이 많은 직장인에게 인기 있어요.' },
-      { keywords: ['학생', '학업', '대학'], response: '학업용으로는 ASUS 비보북 15(890,000원)가 가성비 좋고, 좀 더 투자하시면 레노버 씽크패드 E15(1,190,000원)가 내구성이 뛰어나요.' },
-    ],
-    S1: [
-      { keywords: ['그램', '갤럭시', '비교'], response: 'LG 그램은 더 가볍고(1.19kg) 배터리가 길어 휴대성이 뛰어나요. 갤럭시북4 Pro는 i7 프로세서로 성능이 더 높아 고사양 작업에 적합해요. 주로 어떤 용도로 쓰실 예정인가요?' },
-      { keywords: ['맥북', '맥', '윈도우', '호환'], response: '맥북은 macOS를 사용해 일부 윈도우 전용 프로그램(한글, 특정 업무 소프트웨어)이 호환 안 될 수 있어요. 회사 업무나 특정 프로그램 사용이 많다면 윈도우 노트북을 추천드려요.' },
-      { keywords: ['배터리', '오래'], response: 'LG 그램 16이 최대 22시간으로 가장 길고, 맥북에어 M3가 18시간으로 두 번째예요. 하루 종일 충전 없이 쓰시려면 이 두 제품이 좋아요.' },
-      { keywords: ['무게', '가벼'], response: '무게 순으로 정리하면: LG 그램 16(1.19kg) > 맥북에어 M3(1.24kg) > ASUS 비보북(1.7kg) 순이에요.' },
-    ],
-    S2: [
-      { keywords: ['AS', '보증', '서비스'], response: 'LG 그램 기준 1년 제조사 보증 포함, 공식 서비스센터 전국 운영 중이에요. 3년 연장 보증 추가 시 +59,000원이에요.' },
-      { keywords: ['반품', '환불', '교환'], response: '수령 후 7일 이내 단순 변심 반품 가능하고, 제품 불량 시 30일 이내 교환/환불 가능해요.' },
-      { keywords: ['배송', '언제', '도착'], response: '로켓배송 상품이라 오늘 밤 자정 전 결제 시 내일 도착 가능해요.' },
-      { keywords: ['할인', '쿠폰'], response: '현재 적용 가능한 쿠폰은 없지만, 카드사 무이자 할부는 가능해요.' },
-    ],
-  },
-};
-
-// L2 선제적 메시지 + 선택지
+// ===== AI 추천 메시지 + 선택지 =====
 const AI_PROACTIVE_MSG = {
   detergent: {
     S0: {
@@ -1076,24 +950,14 @@ function getInstruction(group) {
 
   let base = `본 실험에서 당신은 쿠팡에서 <strong>${productName}</strong>를 구매하는 상황을 경험하게 됩니다.<br><br>`;
 
+  const stageNames = { S0: '탐색', S1: '고려', S2: '구매결정' };
+
   if (cfg.level === 'L0') {
     base += `아래 쇼핑 화면을 순서대로 진행해주세요.<br><br>`;
   } else if (cfg.level === 'L1') {
-    if (cfg.aiStage === 'S0') {
-      base += `<span class="highlight">[중요] 제품을 탐색하는 동안 AI 챗봇에게 반드시 1회 이상 질문을 해야 합니다.</span> 질문은 제품, 성분, 용도, 가격 등 어떤 내용이든 괜찮습니다.<br><br>탐색 단계 이후에는 챗봇을 사용할 수 없습니다.<br><br>`;
-    } else if (cfg.aiStage === 'S1') {
-      base += `<span class="highlight">[중요] 제품 상세 페이지를 확인하는 고려 단계에서 AI 챗봇에게 반드시 1회 이상 질문을 해야 합니다.</span> 질문은 성분 비교, 리뷰, 용량, 추천 등 어떤 내용이든 괜찮습니다.<br><br>고려 단계 이후에는 챗봇을 사용할 수 없습니다.<br><br>`;
-    } else {
-      base += `<span class="highlight">[중요] 장바구니에 담은 후 결제 직전 단계에서 AI 챗봇에게 반드시 1회 이상 질문을 해야 합니다.</span> 질문은 배송, 반품, 할인, 재고 등 어떤 내용이든 괜찮습니다.<br><br>`;
-    }
+    base += `<span class="highlight">[중요] ${stageNames[cfg.aiStage]} 단계에서 AI 추천이 화면에 표시됩니다. 반드시 AI 추천 선택지 중 하나를 선택해주세요.</span><br><br>`;
   } else if (cfg.level === 'L2') {
-    if (cfg.aiStage === 'S0') {
-      base += `탐색 단계에서 AI가 먼저 말을 걸 것입니다. AI의 제안에 응답하거나 무시하고 직접 탐색할 수 있습니다.<br><br>`;
-    } else if (cfg.aiStage === 'S1') {
-      base += `제품 상세 페이지를 확인하는 고려 단계에서 AI가 먼저 말을 걸 것입니다. AI의 제안에 응답하거나 무시하고 직접 비교할 수 있습니다.<br><br>`;
-    } else {
-      base += `장바구니에 담은 후 결제 직전 단계에서 AI가 먼저 말을 걸 것입니다. AI의 제안에 응답하거나 무시하고 직접 결제할 수 있습니다.<br><br>`;
-    }
+    base += `${stageNames[cfg.aiStage]} 단계에서 AI가 추천을 제안합니다. AI의 제안에 응답하거나 무시하고 직접 진행할 수 있습니다.<br><br>`;
   }
 
   base += `<span class="highlight">[중요] 장바구니에는 반드시 1개 이상 담아주세요.</span><br>보유 크레딧: <strong>${credit}</strong> (결제 시 차감)`;
@@ -1287,189 +1151,109 @@ function updateProgress() {
   if (document.getElementById('conn-3')) document.getElementById('conn-3').classList.toggle('done', idx >= 3);
 }
 
-// ===== AI =====
-function triggerAI() {
-  if (state.level === 'L0') return;
-  if (state.currentStage !== state.aiStage) {
-    showDisabledAI();
-    return;
-  }
-
-  showAIBanner();
-
-  if (state.level === 'L1') {
-    document.getElementById('ai-fab').classList.add('show');
-    document.getElementById('ai-fab').classList.remove('disabled');
-    const labels = {
-      S0: state.product === 'detergent' ? '💬 세탁세제에 대해 궁금한 점을 질문해주세요!' : '💬 노트북에 대해 궁금한 점을 질문해주세요!',
-      S1: '💬 제품 비교나 선택에 도움이 필요하시면 질문해주세요!',
-      S2: '💬 결제 전 궁금한 점이 있으시면 질문해주세요!',
-    };
-    document.getElementById('ai-fab-label').textContent = labels[state.aiStage];
-    document.getElementById('ai-fab-label').classList.add('show');
-    log('ai_l1_show');
-  } else if (state.level === 'L2') {
-    setTimeout(() => showProactive(), 1500);
-  }
-}
-
-function showAIBanner() {
-  const banner = document.getElementById('ai-banner');
-  const levelLabels = { L1: 'L1 반응적', L2: 'L2 선제적' };
-  const stageLabels = { S0: '탐색 단계', S1: '고려 단계', S2: '구매결정 단계' };
-  document.getElementById('ai-banner-text').textContent = state.level === 'L1'
-    ? 'AI 챗봇이 활성화되었습니다 — 질문해주세요!'
-    : 'AI 쇼핑 도우미가 추천을 준비하고 있습니다...';
-  document.getElementById('ai-banner-badge').textContent = `${levelLabels[state.level]} · ${stageLabels[state.aiStage]}`;
-  banner.classList.add('show');
-  document.getElementById('main-wrap').style.paddingTop = '120px';
-}
-
-function showDisabledAI() {
-  if (state.level === 'L0') return;
-  const activeStages = { S0: '탐색', S1: '고려', S2: '구매결정' };
-
-  if (state.level === 'L1' && state.currentStage !== state.aiStage) {
-    const fab = document.getElementById('ai-fab');
-    fab.classList.add('show', 'disabled');
-    const label = document.getElementById('ai-disabled-label');
-    label.textContent = `AI 도우미는 ${activeStages[state.aiStage]} 단계에서만 이용 가능합니다.`;
-    label.classList.add('show');
-  }
-}
-
+// ===== AI INLINE CARD =====
 let proactiveStep = 0;
 
-function showProactive() {
+function triggerAI() {
+  if (state.level === 'L0') return;
+  if (state.currentStage !== state.aiStage) return;
+
+  const card = document.getElementById(`ai-card-${state.currentStage}`);
+  if (!card) return;
+
   const data = AI_PROACTIVE_MSG[state.product][state.aiStage];
   if (!data) return;
 
-  const msgData = proactiveStep === 0 ? data : (data.followUp || null);
-  if (!msgData) return;
-
-  document.getElementById('ai-proactive-msg').textContent = msgData.message;
-  const choicesDiv = document.getElementById('ai-proactive-choices');
-  choicesDiv.innerHTML = '';
-  msgData.choices.forEach((choice, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'ai-choice-btn';
-    btn.textContent = choice.label;
-    btn.onclick = () => handleProactiveChoice(choice, msgData);
-    choicesDiv.appendChild(btn);
-  });
-  document.getElementById('ai-proactive').classList.add('show');
-  log('ai_l2_show', { step: proactiveStep, message: msgData.message });
+  proactiveStep = 0;
+  renderAICard(card, data);
+  log('ai_show', { level: state.level, stage: state.currentStage });
 }
 
-function handleProactiveChoice(choice, msgData) {
-  log('ai_l2_choice', { label: choice.label, hasResponse: !!choice.response });
-  document.getElementById('ai-proactive').classList.remove('show');
+function renderAICard(card, msgData) {
+  const levelLabel = state.level === 'L1' ? 'AI 추천' : 'AI 추천';
+  const stageLabels = { S0: '탐색 단계', S1: '고려 단계', S2: '구매결정 단계' };
+
+  card.innerHTML = `
+    <div class="ai-card-header">
+      <div class="ai-card-icon">🤖</div>
+      <div class="ai-card-title">AI 쇼핑 도우미</div>
+      <div class="ai-card-badge">${stageLabels[state.currentStage]}</div>
+    </div>
+    <div class="ai-card-message">${msgData.message}</div>
+    <div class="ai-card-choices" id="ai-choices-container"></div>
+  `;
+
+  const choicesDiv = card.querySelector('#ai-choices-container');
+  msgData.choices.forEach((choice) => {
+    const btn = document.createElement('button');
+    btn.className = 'ai-card-choice';
+    btn.textContent = choice.label;
+    btn.onclick = () => handleInlineChoice(card, choice, msgData);
+    choicesDiv.appendChild(btn);
+  });
+
+  card.classList.add('show');
+}
+
+function handleInlineChoice(card, choice, msgData) {
+  log('ai_choice', { label: choice.label, hasResponse: !!choice.response });
+  state.chatCount++;
+
+  const choicesDiv = card.querySelector('#ai-choices-container') || card.querySelector('.ai-card-choices');
+  choicesDiv.innerHTML = '';
 
   if (choice.response) {
-    setTimeout(() => {
-      document.getElementById('ai-proactive-msg').textContent = choice.response;
-      document.getElementById('ai-proactive-choices').innerHTML = '<button class="ai-choice-btn" onclick="dismissProactive()">확인</button>';
-      document.getElementById('ai-proactive').classList.add('show');
-    }, 400);
+    const responseDiv = document.createElement('div');
+    responseDiv.className = 'ai-card-response';
+    responseDiv.textContent = choice.response;
+    choicesDiv.parentElement.appendChild(responseDiv);
+
+    setTimeout(() => checkInlineFollowUp(card), 1500);
   } else {
-    checkFollowUp();
+    const msgDiv = card.querySelector('.ai-card-message');
+    if (msgDiv) msgDiv.textContent = '알겠습니다! 직접 탐색해보세요.';
+    setTimeout(() => checkInlineFollowUp(card), 800);
   }
 }
 
-function dismissProactive() {
-  document.getElementById('ai-proactive').classList.remove('show');
-  log('ai_l2_dismiss');
-  checkFollowUp();
-}
-
-function checkFollowUp() {
+function checkInlineFollowUp(card) {
   const data = AI_PROACTIVE_MSG[state.product][state.aiStage];
   if (proactiveStep === 0 && data.followUp) {
     proactiveStep = 1;
-    setTimeout(() => showProactive(), 800);
-  } else {
-    proactiveStep = 0;
+    setTimeout(() => {
+      const followUpCard = document.createElement('div');
+      followUpCard.className = 'ai-inline-card show';
+      followUpCard.style.marginTop = '12px';
+
+      followUpCard.innerHTML = `
+        <div class="ai-card-header">
+          <div class="ai-card-icon">🤖</div>
+          <div class="ai-card-title">AI 추가 제안</div>
+        </div>
+        <div class="ai-card-message">${data.followUp.message}</div>
+        <div class="ai-card-choices"></div>
+      `;
+
+      const choicesDiv = followUpCard.querySelector('.ai-card-choices');
+      data.followUp.choices.forEach((choice) => {
+        const btn = document.createElement('button');
+        btn.className = 'ai-card-choice';
+        btn.textContent = choice.label;
+        btn.onclick = () => handleInlineChoice(followUpCard, choice, data.followUp);
+        choicesDiv.appendChild(btn);
+      });
+
+      card.parentElement.insertBefore(followUpCard, card.nextSibling);
+    }, 800);
   }
 }
 
 function hideAI() {
-  document.getElementById('ai-fab').classList.remove('show', 'disabled');
-  document.getElementById('ai-fab-label').classList.remove('show');
-  document.getElementById('ai-disabled-label').classList.remove('show');
-  document.getElementById('ai-proactive').classList.remove('show');
-  document.getElementById('chat-panel').classList.remove('show');
-  document.getElementById('ai-banner').classList.remove('show');
-  document.getElementById('main-wrap').style.paddingTop = '72px';
+  ['S0', 'S1', 'S2'].forEach(s => {
+    const card = document.getElementById(`ai-card-${s}`);
+    if (card) { card.classList.remove('show'); card.innerHTML = ''; }
+  });
   proactiveStep = 0;
-}
-
-// ===== CHAT (L1) =====
-function openChat() {
-  if (document.getElementById('ai-fab').classList.contains('disabled')) return;
-  document.getElementById('chat-panel').classList.add('show');
-  document.getElementById('ai-fab-label').classList.remove('show');
-  log('chat_open');
-}
-
-function closeChat() { document.getElementById('chat-panel').classList.remove('show'); }
-
-function sendChat() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-  addChatMsg('user', text);
-  input.value = '';
-  state.chatCount++;
-  log('chat_send', { text, count: state.chatCount });
-
-  updateChatCounter();
-  setTimeout(() => {
-    const reply = getAIReply(text);
-    addChatMsg('ai', reply);
-  }, 600 + Math.random() * 400);
-}
-
-function addChatMsg(type, text) {
-  const el = document.createElement('div');
-  el.className = `chat-msg ${type}`;
-  el.textContent = text;
-  const container = document.getElementById('chat-messages');
-  container.appendChild(el);
-  container.scrollTop = container.scrollHeight;
-}
-
-function updateChatCounter() {
-  const counter = document.getElementById('chat-counter');
-  counter.style.display = 'block';
-  if (state.chatCount >= 1) {
-    counter.textContent = `✅ 필수 질문 완료 (${state.chatCount}회 질문)`;
-    counter.style.background = '#d4edda';
-    counter.style.color = '#155724';
-  } else {
-    counter.textContent = `반드시 1회 이상 질문해주세요 (현재 ${state.chatCount}회)`;
-  }
-}
-
-function getAIReply(userText) {
-  const responses = AI_CHAT_RESPONSES[state.product][state.currentStage];
-  if (!responses) return '죄송해요, 이 단계에서는 도움드리기 어려워요.';
-
-  const lower = userText.toLowerCase();
-  for (const r of responses) {
-    if (r.keywords.some(k => lower.includes(k))) {
-      return r.response;
-    }
-  }
-
-  if (state.product === 'detergent') {
-    if (state.currentStage === 'S0') return '세탁세제에 대해 더 구체적으로 물어봐 주세요! 세탁기 종류, 선호하는 특성(향, 세탁력, 피부 안전성 등)을 알려주시면 맞춤 추천해드릴게요.';
-    if (state.currentStage === 'S1') return '지금 보고 계신 제품에 대해 궁금한 점이 있으시면 말씀해주세요. 성분, 용량 비교, 리뷰 분석 등 도움드릴 수 있어요.';
-    return '결제 관련해서 배송일, 반품 조건, 할인 등 궁금하신 점이 있으시면 말씀해주세요.';
-  } else {
-    if (state.currentStage === 'S0') return '노트북에 대해 더 구체적으로 물어봐 주세요! 용도, 예산, 선호하는 브랜드 등을 알려주시면 맞춤 추천해드릴게요.';
-    if (state.currentStage === 'S1') return '지금 보고 계신 제품에 대해 궁금한 점이 있으시면 말씀해주세요. 스펙 비교, 성능 벤치마크, 실사용 후기 등 도움드릴 수 있어요.';
-    return '결제 관련해서 배송, AS, 반품 조건, 할인 등 궁금하신 점이 있으시면 말씀해주세요.';
-  }
 }
 
 // ===== SURVEY =====

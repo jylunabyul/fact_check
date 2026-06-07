@@ -306,8 +306,8 @@ body {
 .no-purchase-card h2 { font-size: 1.2rem; font-weight: 800; color: #333; margin-bottom: 12px; }
 .no-purchase-card p { font-size: 0.88rem; color: #666; margin-bottom: 24px; line-height: 1.5; }
 
-/* Survey */
-.stage-survey {
+/* Survey (Pre + Post) */
+.stage-pre-survey, .stage-survey {
   min-height: 100vh; display: none; background: #f5f5f7; padding: 40px 20px;
 }
 .survey-container { max-width: 640px; margin: 0 auto; }
@@ -348,13 +348,17 @@ body {
   background: #764ba2; border-color: #764ba2; color: #fff;
 }
 .likert-options label:hover { border-color: #764ba2; color: #764ba2; }
+.survey-radio-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.survey-radio-group label { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 500; color: #444; cursor: pointer; }
+.survey-radio-group input[type="radio"] { width: 16px; height: 16px; accent-color: #764ba2; }
+.survey-select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 10px; font-size: 0.85rem; background: #f9f9f9; }
 
-.btn-submit-survey {
+.btn-submit-survey, .btn-submit-pre {
   width: 100%; padding: 16px; background: linear-gradient(135deg, #667eea, #764ba2);
   color: #fff; border: none; border-radius: 12px; font-size: 1rem;
   font-weight: 700; cursor: pointer; margin-top: 8px; transition: transform 0.2s;
 }
-.btn-submit-survey:hover { transform: translateY(-2px); }
+.btn-submit-survey:hover, .btn-submit-pre:hover { transform: translateY(-2px); }
 .survey-complete { display: none; text-align: center; padding: 60px 20px; }
 .survey-complete h2 { font-size: 1.3rem; font-weight: 800; color: #333; margin-bottom: 12px; }
 .survey-complete p { font-size: 0.88rem; color: #666; line-height: 1.6; }
@@ -419,6 +423,162 @@ body {
         <span id="gh-token-status" style="margin-left:8px; font-size:0.72rem;"></span>
       </div>
     </details>
+  </div>
+</div>
+
+<!-- Pre-Survey (PART 0 + PART 1) -->
+<div class="stage-pre-survey" id="stage-pre-survey">
+  <div class="survey-container">
+    <div class="survey-header">
+      <h1>PART 0 · 1 — 사전 측정</h1>
+      <p>실험 시작 전 귀하의 기본 정보와 평소 성향을 묻는 문항입니다.<br>총 9문항 · 약 2분 소요</p>
+    </div>
+
+    <!-- PART 0: 기본 정보 -->
+    <div class="survey-section">
+      <h3>PART 0. 응답자 기본 정보</h3>
+      <div class="survey-question">
+        <label>Q0-1. 성별</label>
+        <div class="survey-radio-group">
+          <label><input type="radio" name="pre_gender" value="male"> 남성</label>
+          <label><input type="radio" name="pre_gender" value="female"> 여성</label>
+          <label><input type="radio" name="pre_gender" value="other"> 기타/응답하지 않음</label>
+        </div>
+      </div>
+      <div class="survey-question">
+        <label>Q0-2. 연령대</label>
+        <div class="survey-radio-group">
+          <label><input type="radio" name="pre_age" value="20s"> 20대</label>
+          <label><input type="radio" name="pre_age" value="30s"> 30대</label>
+          <label><input type="radio" name="pre_age" value="40s"> 40대</label>
+          <label><input type="radio" name="pre_age" value="50+"> 50대 이상</label>
+        </div>
+      </div>
+      <div class="survey-question">
+        <label>이름을 입력해주세요.</label>
+        <input type="text" id="input-name" placeholder="홍길동"
+          style="width:100%; padding:12px 14px; border:1px solid #ddd; border-radius:10px; font-size:0.88rem; background:#f9f9f9;">
+      </div>
+    </div>
+
+    <!-- PART 1: AI 리터러시 -->
+    <div class="survey-section">
+      <h3>PART 1. AI 리터러시 (사전 측정)</h3>
+      <p style="font-size:0.75rem; color:#888; margin-bottom:16px;">1(전혀 그렇지 않다) ~ 7(매우 그렇다)</p>
+      <div class="survey-question" data-id="ai_lit_1">
+        <label>Q1. 나는 AI 도구(챗봇, 추천 시스템 등)를 일상에서 자주 사용한다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ai_lit_1" id="al1_1" value="1"><label for="al1_1">1</label>
+            <input type="radio" name="ai_lit_1" id="al1_2" value="2"><label for="al1_2">2</label>
+            <input type="radio" name="ai_lit_1" id="al1_3" value="3"><label for="al1_3">3</label>
+            <input type="radio" name="ai_lit_1" id="al1_4" value="4"><label for="al1_4">4</label>
+            <input type="radio" name="ai_lit_1" id="al1_5" value="5"><label for="al1_5">5</label>
+            <input type="radio" name="ai_lit_1" id="al1_6" value="6"><label for="al1_6">6</label>
+            <input type="radio" name="ai_lit_1" id="al1_7" value="7"><label for="al1_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ai_lit_2">
+        <label>Q2. 나는 AI가 생성한 결과의 품질을 스스로 평가할 수 있다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ai_lit_2" id="al2_1" value="1"><label for="al2_1">1</label>
+            <input type="radio" name="ai_lit_2" id="al2_2" value="2"><label for="al2_2">2</label>
+            <input type="radio" name="ai_lit_2" id="al2_3" value="3"><label for="al2_3">3</label>
+            <input type="radio" name="ai_lit_2" id="al2_4" value="4"><label for="al2_4">4</label>
+            <input type="radio" name="ai_lit_2" id="al2_5" value="5"><label for="al2_5">5</label>
+            <input type="radio" name="ai_lit_2" id="al2_6" value="6"><label for="al2_6">6</label>
+            <input type="radio" name="ai_lit_2" id="al2_7" value="7"><label for="al2_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ai_lit_3">
+        <label>Q3. 나는 AI가 어떤 방식으로 작동하는지 기본적으로 이해하고 있다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ai_lit_3" id="al3_1" value="1"><label for="al3_1">1</label>
+            <input type="radio" name="ai_lit_3" id="al3_2" value="2"><label for="al3_2">2</label>
+            <input type="radio" name="ai_lit_3" id="al3_3" value="3"><label for="al3_3">3</label>
+            <input type="radio" name="ai_lit_3" id="al3_4" value="4"><label for="al3_4">4</label>
+            <input type="radio" name="ai_lit_3" id="al3_5" value="5"><label for="al3_5">5</label>
+            <input type="radio" name="ai_lit_3" id="al3_6" value="6"><label for="al3_6">6</label>
+            <input type="radio" name="ai_lit_3" id="al3_7" value="7"><label for="al3_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ai_lit_4">
+        <label>Q4. 나는 AI 사용 시 개인정보 보호 문제를 인식하고 있다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ai_lit_4" id="al4_1" value="1"><label for="al4_1">1</label>
+            <input type="radio" name="ai_lit_4" id="al4_2" value="2"><label for="al4_2">2</label>
+            <input type="radio" name="ai_lit_4" id="al4_3" value="3"><label for="al4_3">3</label>
+            <input type="radio" name="ai_lit_4" id="al4_4" value="4"><label for="al4_4">4</label>
+            <input type="radio" name="ai_lit_4" id="al4_5" value="5"><label for="al4_5">5</label>
+            <input type="radio" name="ai_lit_4" id="al4_6" value="6"><label for="al4_6">6</label>
+            <input type="radio" name="ai_lit_4" id="al4_7" value="7"><label for="al4_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ai_lit_5">
+        <label>Q5. 나는 AI 추천 시스템이 어떻게 작동하는지 이해하고 있다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ai_lit_5" id="al5_1" value="1"><label for="al5_1">1</label>
+            <input type="radio" name="ai_lit_5" id="al5_2" value="2"><label for="al5_2">2</label>
+            <input type="radio" name="ai_lit_5" id="al5_3" value="3"><label for="al5_3">3</label>
+            <input type="radio" name="ai_lit_5" id="al5_4" value="4"><label for="al5_4">4</label>
+            <input type="radio" name="ai_lit_5" id="al5_5" value="5"><label for="al5_5">5</label>
+            <input type="radio" name="ai_lit_5" id="al5_6" value="6"><label for="al5_6">6</label>
+            <input type="radio" name="ai_lit_5" id="al5_7" value="7"><label for="al5_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ai_lit_6">
+        <label>Q6. 나는 AI와 상호작용하는 것이 편안하다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ai_lit_6" id="al6_1" value="1"><label for="al6_1">1</label>
+            <input type="radio" name="ai_lit_6" id="al6_2" value="2"><label for="al6_2">2</label>
+            <input type="radio" name="ai_lit_6" id="al6_3" value="3"><label for="al6_3">3</label>
+            <input type="radio" name="ai_lit_6" id="al6_4" value="4"><label for="al6_4">4</label>
+            <input type="radio" name="ai_lit_6" id="al6_5" value="5"><label for="al6_5">5</label>
+            <input type="radio" name="ai_lit_6" id="al6_6" value="6"><label for="al6_6">6</label>
+            <input type="radio" name="ai_lit_6" id="al6_7" value="7"><label for="al6_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 온라인 쇼핑 빈도 -->
+    <div class="survey-section">
+      <h3>온라인 쇼핑 경험</h3>
+      <div class="survey-question">
+        <label>Q7. 최근 3개월간 온라인 쇼핑 횟수는 어느 정도입니까?</label>
+        <div class="survey-radio-group" style="flex-direction: column;">
+          <label><input type="radio" name="pre_shop_freq" value="1"> 거의 안 함</label>
+          <label><input type="radio" name="pre_shop_freq" value="2"> 월 1~2회</label>
+          <label><input type="radio" name="pre_shop_freq" value="3"> 주 1회</label>
+          <label><input type="radio" name="pre_shop_freq" value="4"> 주 2~3회</label>
+          <label><input type="radio" name="pre_shop_freq" value="5"> 거의 매일</label>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-submit-pre" onclick="submitPreSurvey()">사전 설문 완료 → 쇼핑 시작</button>
   </div>
 </div>
 
@@ -583,229 +743,455 @@ body {
 <div class="stage-survey" id="stage-survey">
   <div class="survey-container">
     <div class="survey-header">
-      <h1>쇼핑 경험 설문</h1>
-      <p>방금 체험하신 쇼핑 과정에 대해 솔직하게 응답해 주세요.</p>
+      <h1>PART 2 — 사후 측정</h1>
+      <p>방금 경험하신 프로토타입 쇼핑몰 이용 경험을 바탕으로 응답해 주십시오.<br>1(전혀 그렇지 않다) ~ 7(매우 그렇다)</p>
     </div>
 
-    <!-- 제품 관여도 (Zaichkowsky RPII 3문항) -->
+    <!-- A. 조작 점검 -->
     <div class="survey-section">
-      <h3>[1] 제품 관여도</h3>
-      <p style="font-size:0.75rem; color:#888; margin-bottom:16px;">아래 문항에 대해 7점 척도로 응답해 주세요.</p>
-      <div class="survey-question" data-id="involvement_1">
-        <label>나에게 이 제품은...</label>
+      <h3>A. 조작 점검 (Manipulation Check)</h3>
+      <div class="survey-question" data-id="mc_1">
+        <label>MC-1. AI가 내가 요청하기 전에 먼저 제안하거나 말을 걸었다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="mc_1" id="mc1_1" value="1"><label for="mc1_1">1</label>
+            <input type="radio" name="mc_1" id="mc1_2" value="2"><label for="mc1_2">2</label>
+            <input type="radio" name="mc_1" id="mc1_3" value="3"><label for="mc1_3">3</label>
+            <input type="radio" name="mc_1" id="mc1_4" value="4"><label for="mc1_4">4</label>
+            <input type="radio" name="mc_1" id="mc1_5" value="5"><label for="mc1_5">5</label>
+            <input type="radio" name="mc_1" id="mc1_6" value="6"><label for="mc1_6">6</label>
+            <input type="radio" name="mc_1" id="mc1_7" value="7"><label for="mc1_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="mc_2">
+        <label>MC-2. AI는 내가 먼저 클릭하거나 요청했을 때만 응답했다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="mc_2" id="mc2_1" value="1"><label for="mc2_1">1</label>
+            <input type="radio" name="mc_2" id="mc2_2" value="2"><label for="mc2_2">2</label>
+            <input type="radio" name="mc_2" id="mc2_3" value="3"><label for="mc2_3">3</label>
+            <input type="radio" name="mc_2" id="mc2_4" value="4"><label for="mc2_4">4</label>
+            <input type="radio" name="mc_2" id="mc2_5" value="5"><label for="mc2_5">5</label>
+            <input type="radio" name="mc_2" id="mc2_6" value="6"><label for="mc2_6">6</label>
+            <input type="radio" name="mc_2" id="mc2_7" value="7"><label for="mc2_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="mc_3">
+        <label>MC-3. 이번 쇼핑 과정에서 AI 기능(추천, 챗봇 등)을 전혀 경험하지 않았다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="mc_3" id="mc3_1" value="1"><label for="mc3_1">1</label>
+            <input type="radio" name="mc_3" id="mc3_2" value="2"><label for="mc3_2">2</label>
+            <input type="radio" name="mc_3" id="mc3_3" value="3"><label for="mc3_3">3</label>
+            <input type="radio" name="mc_3" id="mc3_4" value="4"><label for="mc3_4">4</label>
+            <input type="radio" name="mc_3" id="mc3_5" value="5"><label for="mc3_5">5</label>
+            <input type="radio" name="mc_3" id="mc3_6" value="6"><label for="mc3_6">6</label>
+            <input type="radio" name="mc_3" id="mc3_7" value="7"><label for="mc3_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- B. 지각된 통제감 (5문항) -->
+    <div class="survey-section">
+      <h3>B. 지각된 통제감 (매개변수 M1)</h3>
+      <div class="survey-question" data-id="pc_1">
+        <label>PC-1. 나는 이번 쇼핑 과정에서 내가 원하는 방식으로 결정을 내렸다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="pc_1" id="pc1_1" value="1"><label for="pc1_1">1</label>
+            <input type="radio" name="pc_1" id="pc1_2" value="2"><label for="pc1_2">2</label>
+            <input type="radio" name="pc_1" id="pc1_3" value="3"><label for="pc1_3">3</label>
+            <input type="radio" name="pc_1" id="pc1_4" value="4"><label for="pc1_4">4</label>
+            <input type="radio" name="pc_1" id="pc1_5" value="5"><label for="pc1_5">5</label>
+            <input type="radio" name="pc_1" id="pc1_6" value="6"><label for="pc1_6">6</label>
+            <input type="radio" name="pc_1" id="pc1_7" value="7"><label for="pc1_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="pc_2">
+        <label>PC-2. AI의 제안을 받아들이거나 무시하는 것이 전적으로 나의 선택이었다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="pc_2" id="pc2_1" value="1"><label for="pc2_1">1</label>
+            <input type="radio" name="pc_2" id="pc2_2" value="2"><label for="pc2_2">2</label>
+            <input type="radio" name="pc_2" id="pc2_3" value="3"><label for="pc2_3">3</label>
+            <input type="radio" name="pc_2" id="pc2_4" value="4"><label for="pc2_4">4</label>
+            <input type="radio" name="pc_2" id="pc2_5" value="5"><label for="pc2_5">5</label>
+            <input type="radio" name="pc_2" id="pc2_6" value="6"><label for="pc2_6">6</label>
+            <input type="radio" name="pc_2" id="pc2_7" value="7"><label for="pc2_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="pc_3">
+        <label>PC-3. 쇼핑 전 과정에서 내가 주도권을 갖고 있다고 느꼈다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="pc_3" id="pc3_1" value="1"><label for="pc3_1">1</label>
+            <input type="radio" name="pc_3" id="pc3_2" value="2"><label for="pc3_2">2</label>
+            <input type="radio" name="pc_3" id="pc3_3" value="3"><label for="pc3_3">3</label>
+            <input type="radio" name="pc_3" id="pc3_4" value="4"><label for="pc3_4">4</label>
+            <input type="radio" name="pc_3" id="pc3_5" value="5"><label for="pc3_5">5</label>
+            <input type="radio" name="pc_3" id="pc3_6" value="6"><label for="pc3_6">6</label>
+            <input type="radio" name="pc_3" id="pc3_7" value="7"><label for="pc3_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="pc_4">
+        <label>PC-4. 나는 원하는 방향으로 자유롭게 탐색할 수 있었다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="pc_4" id="pc4_1" value="1"><label for="pc4_1">1</label>
+            <input type="radio" name="pc_4" id="pc4_2" value="2"><label for="pc4_2">2</label>
+            <input type="radio" name="pc_4" id="pc4_3" value="3"><label for="pc4_3">3</label>
+            <input type="radio" name="pc_4" id="pc4_4" value="4"><label for="pc4_4">4</label>
+            <input type="radio" name="pc_4" id="pc4_5" value="5"><label for="pc4_5">5</label>
+            <input type="radio" name="pc_4" id="pc4_6" value="6"><label for="pc4_6">6</label>
+            <input type="radio" name="pc_4" id="pc4_7" value="7"><label for="pc4_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="pc_5">
+        <label>PC-5. AI 개입이 있더라도 최종 결정은 내가 내렸다고 느꼈다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="pc_5" id="pc5_1" value="1"><label for="pc5_1">1</label>
+            <input type="radio" name="pc_5" id="pc5_2" value="2"><label for="pc5_2">2</label>
+            <input type="radio" name="pc_5" id="pc5_3" value="3"><label for="pc5_3">3</label>
+            <input type="radio" name="pc_5" id="pc5_4" value="4"><label for="pc5_4">4</label>
+            <input type="radio" name="pc_5" id="pc5_5" value="5"><label for="pc5_5">5</label>
+            <input type="radio" name="pc_5" id="pc5_6" value="6"><label for="pc5_6">6</label>
+            <input type="radio" name="pc_5" id="pc5_7" value="7"><label for="pc5_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- C. 자기결정 확신 (5문항) -->
+    <div class="survey-section">
+      <h3>C. 자기결정 확신 (매개변수 M2)</h3>
+      <div class="survey-question" data-id="dc_1">
+        <label>DC-1. 나는 내 필요에 가장 맞는 제품을 선택했다고 확신한다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="dc_1" id="dc1_1" value="1"><label for="dc1_1">1</label>
+            <input type="radio" name="dc_1" id="dc1_2" value="2"><label for="dc1_2">2</label>
+            <input type="radio" name="dc_1" id="dc1_3" value="3"><label for="dc1_3">3</label>
+            <input type="radio" name="dc_1" id="dc1_4" value="4"><label for="dc1_4">4</label>
+            <input type="radio" name="dc_1" id="dc1_5" value="5"><label for="dc1_5">5</label>
+            <input type="radio" name="dc_1" id="dc1_6" value="6"><label for="dc1_6">6</label>
+            <input type="radio" name="dc_1" id="dc1_7" value="7"><label for="dc1_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="dc_2">
+        <label>DC-2. 이번 결정에 대해 후회하지 않을 것이다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="dc_2" id="dc2_1" value="1"><label for="dc2_1">1</label>
+            <input type="radio" name="dc_2" id="dc2_2" value="2"><label for="dc2_2">2</label>
+            <input type="radio" name="dc_2" id="dc2_3" value="3"><label for="dc2_3">3</label>
+            <input type="radio" name="dc_2" id="dc2_4" value="4"><label for="dc2_4">4</label>
+            <input type="radio" name="dc_2" id="dc2_5" value="5"><label for="dc2_5">5</label>
+            <input type="radio" name="dc_2" id="dc2_6" value="6"><label for="dc2_6">6</label>
+            <input type="radio" name="dc_2" id="dc2_7" value="7"><label for="dc2_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="dc_3">
+        <label>DC-3. 나는 최선의 선택을 했다고 생각한다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="dc_3" id="dc3_1" value="1"><label for="dc3_1">1</label>
+            <input type="radio" name="dc_3" id="dc3_2" value="2"><label for="dc3_2">2</label>
+            <input type="radio" name="dc_3" id="dc3_3" value="3"><label for="dc3_3">3</label>
+            <input type="radio" name="dc_3" id="dc3_4" value="4"><label for="dc3_4">4</label>
+            <input type="radio" name="dc_3" id="dc3_5" value="5"><label for="dc3_5">5</label>
+            <input type="radio" name="dc_3" id="dc3_6" value="6"><label for="dc3_6">6</label>
+            <input type="radio" name="dc_3" id="dc3_7" value="7"><label for="dc3_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="dc_4">
+        <label>DC-4. 나는 다른 옵션들보다 이 제품이 더 낫다고 확신한다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="dc_4" id="dc4_1" value="1"><label for="dc4_1">1</label>
+            <input type="radio" name="dc_4" id="dc4_2" value="2"><label for="dc4_2">2</label>
+            <input type="radio" name="dc_4" id="dc4_3" value="3"><label for="dc4_3">3</label>
+            <input type="radio" name="dc_4" id="dc4_4" value="4"><label for="dc4_4">4</label>
+            <input type="radio" name="dc_4" id="dc4_5" value="5"><label for="dc4_5">5</label>
+            <input type="radio" name="dc_4" id="dc4_6" value="6"><label for="dc4_6">6</label>
+            <input type="radio" name="dc_4" id="dc4_7" value="7"><label for="dc4_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="dc_5">
+        <label>DC-5. 이번 선택에 대해 심리적으로 편안함을 느낀다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="dc_5" id="dc5_1" value="1"><label for="dc5_1">1</label>
+            <input type="radio" name="dc_5" id="dc5_2" value="2"><label for="dc5_2">2</label>
+            <input type="radio" name="dc_5" id="dc5_3" value="3"><label for="dc5_3">3</label>
+            <input type="radio" name="dc_5" id="dc5_4" value="4"><label for="dc5_4">4</label>
+            <input type="radio" name="dc_5" id="dc5_5" value="5"><label for="dc5_5">5</label>
+            <input type="radio" name="dc_5" id="dc5_6" value="6"><label for="dc5_6">6</label>
+            <input type="radio" name="dc_5" id="dc5_7" value="7"><label for="dc5_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- D. 구매 만족도 (5문항) -->
+    <div class="survey-section">
+      <h3>D. 구매 만족도 (최종 DV)</h3>
+      <div class="survey-question" data-id="ps_1">
+        <label>PS-1. 이번 쇼핑 경험 전반에 만족한다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ps_1" id="ps1_1" value="1"><label for="ps1_1">1</label>
+            <input type="radio" name="ps_1" id="ps1_2" value="2"><label for="ps1_2">2</label>
+            <input type="radio" name="ps_1" id="ps1_3" value="3"><label for="ps1_3">3</label>
+            <input type="radio" name="ps_1" id="ps1_4" value="4"><label for="ps1_4">4</label>
+            <input type="radio" name="ps_1" id="ps1_5" value="5"><label for="ps1_5">5</label>
+            <input type="radio" name="ps_1" id="ps1_6" value="6"><label for="ps1_6">6</label>
+            <input type="radio" name="ps_1" id="ps1_7" value="7"><label for="ps1_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ps_2">
+        <label>PS-2. 이 플랫폼에서 다시 쇼핑하고 싶다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ps_2" id="ps2_1" value="1"><label for="ps2_1">1</label>
+            <input type="radio" name="ps_2" id="ps2_2" value="2"><label for="ps2_2">2</label>
+            <input type="radio" name="ps_2" id="ps2_3" value="3"><label for="ps2_3">3</label>
+            <input type="radio" name="ps_2" id="ps2_4" value="4"><label for="ps2_4">4</label>
+            <input type="radio" name="ps_2" id="ps2_5" value="5"><label for="ps2_5">5</label>
+            <input type="radio" name="ps_2" id="ps2_6" value="6"><label for="ps2_6">6</label>
+            <input type="radio" name="ps_2" id="ps2_7" value="7"><label for="ps2_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ps_3">
+        <label>PS-3. 이번 쇼핑 과정은 내 기대에 부합했다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ps_3" id="ps3_1" value="1"><label for="ps3_1">1</label>
+            <input type="radio" name="ps_3" id="ps3_2" value="2"><label for="ps3_2">2</label>
+            <input type="radio" name="ps_3" id="ps3_3" value="3"><label for="ps3_3">3</label>
+            <input type="radio" name="ps_3" id="ps3_4" value="4"><label for="ps3_4">4</label>
+            <input type="radio" name="ps_3" id="ps3_5" value="5"><label for="ps3_5">5</label>
+            <input type="radio" name="ps_3" id="ps3_6" value="6"><label for="ps3_6">6</label>
+            <input type="radio" name="ps_3" id="ps3_7" value="7"><label for="ps3_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ps_4">
+        <label>PS-4. 이번 쇼핑은 현명한 선택이었다고 생각한다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ps_4" id="ps4_1" value="1"><label for="ps4_1">1</label>
+            <input type="radio" name="ps_4" id="ps4_2" value="2"><label for="ps4_2">2</label>
+            <input type="radio" name="ps_4" id="ps4_3" value="3"><label for="ps4_3">3</label>
+            <input type="radio" name="ps_4" id="ps4_4" value="4"><label for="ps4_4">4</label>
+            <input type="radio" name="ps_4" id="ps4_5" value="5"><label for="ps4_5">5</label>
+            <input type="radio" name="ps_4" id="ps4_6" value="6"><label for="ps4_6">6</label>
+            <input type="radio" name="ps_4" id="ps4_7" value="7"><label for="ps4_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ps_5">
+        <label>PS-5. 전반적으로 이번 쇼핑 경험은 긍정적이었다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ps_5" id="ps5_1" value="1"><label for="ps5_1">1</label>
+            <input type="radio" name="ps_5" id="ps5_2" value="2"><label for="ps5_2">2</label>
+            <input type="radio" name="ps_5" id="ps5_3" value="3"><label for="ps5_3">3</label>
+            <input type="radio" name="ps_5" id="ps5_4" value="4"><label for="ps5_4">4</label>
+            <input type="radio" name="ps_5" id="ps5_5" value="5"><label for="ps5_5">5</label>
+            <input type="radio" name="ps_5" id="ps5_6" value="6"><label for="ps5_6">6</label>
+            <input type="radio" name="ps_5" id="ps5_7" value="7"><label for="ps5_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- E. 역채점 문항 (3문항) -->
+    <div class="survey-section">
+      <h3>E. 응답 신뢰도 확인 (역채점)</h3>
+      <div class="survey-question" data-id="pc_r">
+        <label>PC-R. 나는 AI가 유도하는 대로 선택했다고 느꼈다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="pc_r" id="pcr_1" value="1"><label for="pcr_1">1</label>
+            <input type="radio" name="pc_r" id="pcr_2" value="2"><label for="pcr_2">2</label>
+            <input type="radio" name="pc_r" id="pcr_3" value="3"><label for="pcr_3">3</label>
+            <input type="radio" name="pc_r" id="pcr_4" value="4"><label for="pcr_4">4</label>
+            <input type="radio" name="pc_r" id="pcr_5" value="5"><label for="pcr_5">5</label>
+            <input type="radio" name="pc_r" id="pcr_6" value="6"><label for="pcr_6">6</label>
+            <input type="radio" name="pc_r" id="pcr_7" value="7"><label for="pcr_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="dc_r">
+        <label>DC-R. 나는 내 선택이 옳은지 끝까지 확신하지 못했다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="dc_r" id="dcr_1" value="1"><label for="dcr_1">1</label>
+            <input type="radio" name="dc_r" id="dcr_2" value="2"><label for="dcr_2">2</label>
+            <input type="radio" name="dc_r" id="dcr_3" value="3"><label for="dcr_3">3</label>
+            <input type="radio" name="dc_r" id="dcr_4" value="4"><label for="dcr_4">4</label>
+            <input type="radio" name="dc_r" id="dcr_5" value="5"><label for="dcr_5">5</label>
+            <input type="radio" name="dc_r" id="dcr_6" value="6"><label for="dcr_6">6</label>
+            <input type="radio" name="dc_r" id="dcr_7" value="7"><label for="dcr_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+      <div class="survey-question" data-id="ps_r">
+        <label>PS-R. 이번 쇼핑 경험은 전반적으로 기대에 못 미쳤다</label>
+        <div class="likert-scale">
+          <span class="scale-label">전혀 아니다</span>
+          <div class="likert-options">
+            <input type="radio" name="ps_r" id="psr_1" value="1"><label for="psr_1">1</label>
+            <input type="radio" name="ps_r" id="psr_2" value="2"><label for="psr_2">2</label>
+            <input type="radio" name="ps_r" id="psr_3" value="3"><label for="psr_3">3</label>
+            <input type="radio" name="ps_r" id="psr_4" value="4"><label for="psr_4">4</label>
+            <input type="radio" name="ps_r" id="psr_5" value="5"><label for="psr_5">5</label>
+            <input type="radio" name="ps_r" id="psr_6" value="6"><label for="psr_6">6</label>
+            <input type="radio" name="ps_r" id="psr_7" value="7"><label for="psr_7">7</label>
+          </div>
+          <span class="scale-label">매우 그렇다</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- F. 제품 관여도 (3문항, 양극 척도) -->
+    <div class="survey-section">
+      <h3>F. 제품 관여도 (공변량)</h3>
+      <p style="font-size:0.75rem; color:#888; margin-bottom:16px;">왼쪽(1점)이 부정적, 오른쪽(7점)이 긍정적 형용사입니다.</p>
+      <div class="survey-question" data-id="inv_1">
+        <label>INV-1. 나에게 이 제품은: 중요하지 않다 ↔ 중요하다</label>
         <div class="likert-scale">
           <span class="scale-label">중요하지 않다</span>
           <div class="likert-options">
-            <input type="radio" name="involvement_1" id="inv1_1" value="1"><label for="inv1_1">1</label>
-            <input type="radio" name="involvement_1" id="inv1_2" value="2"><label for="inv1_2">2</label>
-            <input type="radio" name="involvement_1" id="inv1_3" value="3"><label for="inv1_3">3</label>
-            <input type="radio" name="involvement_1" id="inv1_4" value="4"><label for="inv1_4">4</label>
-            <input type="radio" name="involvement_1" id="inv1_5" value="5"><label for="inv1_5">5</label>
-            <input type="radio" name="involvement_1" id="inv1_6" value="6"><label for="inv1_6">6</label>
-            <input type="radio" name="involvement_1" id="inv1_7" value="7"><label for="inv1_7">7</label>
+            <input type="radio" name="inv_1" id="inv1_1" value="1"><label for="inv1_1">1</label>
+            <input type="radio" name="inv_1" id="inv1_2" value="2"><label for="inv1_2">2</label>
+            <input type="radio" name="inv_1" id="inv1_3" value="3"><label for="inv1_3">3</label>
+            <input type="radio" name="inv_1" id="inv1_4" value="4"><label for="inv1_4">4</label>
+            <input type="radio" name="inv_1" id="inv1_5" value="5"><label for="inv1_5">5</label>
+            <input type="radio" name="inv_1" id="inv1_6" value="6"><label for="inv1_6">6</label>
+            <input type="radio" name="inv_1" id="inv1_7" value="7"><label for="inv1_7">7</label>
           </div>
           <span class="scale-label">중요하다</span>
         </div>
       </div>
-      <div class="survey-question" data-id="involvement_2">
-        <label>나에게 이 제품은...</label>
+      <div class="survey-question" data-id="inv_2">
+        <label>INV-2. 나에게 이 제품은: 관련이 없다 ↔ 관련이 있다</label>
         <div class="likert-scale">
-          <span class="scale-label">관련이 없다</span>
+          <span class="scale-label">관련 없다</span>
           <div class="likert-options">
-            <input type="radio" name="involvement_2" id="inv2_1" value="1"><label for="inv2_1">1</label>
-            <input type="radio" name="involvement_2" id="inv2_2" value="2"><label for="inv2_2">2</label>
-            <input type="radio" name="involvement_2" id="inv2_3" value="3"><label for="inv2_3">3</label>
-            <input type="radio" name="involvement_2" id="inv2_4" value="4"><label for="inv2_4">4</label>
-            <input type="radio" name="involvement_2" id="inv2_5" value="5"><label for="inv2_5">5</label>
-            <input type="radio" name="involvement_2" id="inv2_6" value="6"><label for="inv2_6">6</label>
-            <input type="radio" name="involvement_2" id="inv2_7" value="7"><label for="inv2_7">7</label>
+            <input type="radio" name="inv_2" id="inv2_1" value="1"><label for="inv2_1">1</label>
+            <input type="radio" name="inv_2" id="inv2_2" value="2"><label for="inv2_2">2</label>
+            <input type="radio" name="inv_2" id="inv2_3" value="3"><label for="inv2_3">3</label>
+            <input type="radio" name="inv_2" id="inv2_4" value="4"><label for="inv2_4">4</label>
+            <input type="radio" name="inv_2" id="inv2_5" value="5"><label for="inv2_5">5</label>
+            <input type="radio" name="inv_2" id="inv2_6" value="6"><label for="inv2_6">6</label>
+            <input type="radio" name="inv_2" id="inv2_7" value="7"><label for="inv2_7">7</label>
           </div>
-          <span class="scale-label">관련이 있다</span>
+          <span class="scale-label">관련 있다</span>
         </div>
       </div>
-      <div class="survey-question" data-id="involvement_3">
-        <label>나에게 이 제품은...</label>
+      <div class="survey-question" data-id="inv_3">
+        <label>INV-3. 나에게 이 제품은: 가치 없다 ↔ 가치 있다</label>
         <div class="likert-scale">
           <span class="scale-label">가치 없다</span>
           <div class="likert-options">
-            <input type="radio" name="involvement_3" id="inv3_1" value="1"><label for="inv3_1">1</label>
-            <input type="radio" name="involvement_3" id="inv3_2" value="2"><label for="inv3_2">2</label>
-            <input type="radio" name="involvement_3" id="inv3_3" value="3"><label for="inv3_3">3</label>
-            <input type="radio" name="involvement_3" id="inv3_4" value="4"><label for="inv3_4">4</label>
-            <input type="radio" name="involvement_3" id="inv3_5" value="5"><label for="inv3_5">5</label>
-            <input type="radio" name="involvement_3" id="inv3_6" value="6"><label for="inv3_6">6</label>
-            <input type="radio" name="involvement_3" id="inv3_7" value="7"><label for="inv3_7">7</label>
+            <input type="radio" name="inv_3" id="inv3_1" value="1"><label for="inv3_1">1</label>
+            <input type="radio" name="inv_3" id="inv3_2" value="2"><label for="inv3_2">2</label>
+            <input type="radio" name="inv_3" id="inv3_3" value="3"><label for="inv3_3">3</label>
+            <input type="radio" name="inv_3" id="inv3_4" value="4"><label for="inv3_4">4</label>
+            <input type="radio" name="inv_3" id="inv3_5" value="5"><label for="inv3_5">5</label>
+            <input type="radio" name="inv_3" id="inv3_6" value="6"><label for="inv3_6">6</label>
+            <input type="radio" name="inv_3" id="inv3_7" value="7"><label for="inv3_7">7</label>
           </div>
           <span class="scale-label">가치 있다</span>
         </div>
       </div>
     </div>
 
-    <!-- 지각된 통제감 -->
+    <!-- G. 실험 조건 확인 -->
     <div class="survey-section">
-      <h3>[2] 지각된 통제감</h3>
-      <div class="survey-question" data-id="control_1">
-        <label>쇼핑 과정에서 내가 원하는 대로 결정할 수 있었다.</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="control_1" id="c1_1" value="1"><label for="c1_1">1</label>
-            <input type="radio" name="control_1" id="c1_2" value="2"><label for="c1_2">2</label>
-            <input type="radio" name="control_1" id="c1_3" value="3"><label for="c1_3">3</label>
-            <input type="radio" name="control_1" id="c1_4" value="4"><label for="c1_4">4</label>
-            <input type="radio" name="control_1" id="c1_5" value="5"><label for="c1_5">5</label>
-            <input type="radio" name="control_1" id="c1_6" value="6"><label for="c1_6">6</label>
-            <input type="radio" name="control_1" id="c1_7" value="7"><label for="c1_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-      <div class="survey-question" data-id="control_2">
-        <label>쇼핑 과정에서 선택의 주도권이 나에게 있었다.</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="control_2" id="c2_1" value="1"><label for="c2_1">1</label>
-            <input type="radio" name="control_2" id="c2_2" value="2"><label for="c2_2">2</label>
-            <input type="radio" name="control_2" id="c2_3" value="3"><label for="c2_3">3</label>
-            <input type="radio" name="control_2" id="c2_4" value="4"><label for="c2_4">4</label>
-            <input type="radio" name="control_2" id="c2_5" value="5"><label for="c2_5">5</label>
-            <input type="radio" name="control_2" id="c2_6" value="6"><label for="c2_6">6</label>
-            <input type="radio" name="control_2" id="c2_7" value="7"><label for="c2_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-      <div class="survey-question" data-id="control_3">
-        <label>외부 요인(AI 등)에 의해 내 결정이 좌우된 것 같다. (R)</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="control_3" id="c3_1" value="1"><label for="c3_1">1</label>
-            <input type="radio" name="control_3" id="c3_2" value="2"><label for="c3_2">2</label>
-            <input type="radio" name="control_3" id="c3_3" value="3"><label for="c3_3">3</label>
-            <input type="radio" name="control_3" id="c3_4" value="4"><label for="c3_4">4</label>
-            <input type="radio" name="control_3" id="c3_5" value="5"><label for="c3_5">5</label>
-            <input type="radio" name="control_3" id="c3_6" value="6"><label for="c3_6">6</label>
-            <input type="radio" name="control_3" id="c3_7" value="7"><label for="c3_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 자기결정 확신 -->
-    <div class="survey-section">
-      <h3>[3] 자기결정 확신</h3>
-      <div class="survey-question" data-id="confidence_1">
-        <label>내가 선택한 제품이 나에게 가장 적합한 제품이라고 확신한다.</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="confidence_1" id="cf1_1" value="1"><label for="cf1_1">1</label>
-            <input type="radio" name="confidence_1" id="cf1_2" value="2"><label for="cf1_2">2</label>
-            <input type="radio" name="confidence_1" id="cf1_3" value="3"><label for="cf1_3">3</label>
-            <input type="radio" name="confidence_1" id="cf1_4" value="4"><label for="cf1_4">4</label>
-            <input type="radio" name="confidence_1" id="cf1_5" value="5"><label for="cf1_5">5</label>
-            <input type="radio" name="confidence_1" id="cf1_6" value="6"><label for="cf1_6">6</label>
-            <input type="radio" name="confidence_1" id="cf1_7" value="7"><label for="cf1_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-      <div class="survey-question" data-id="confidence_2">
-        <label>제품을 선택하는 과정에서 스스로 판단하여 결정했다.</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="confidence_2" id="cf2_1" value="1"><label for="cf2_1">1</label>
-            <input type="radio" name="confidence_2" id="cf2_2" value="2"><label for="cf2_2">2</label>
-            <input type="radio" name="confidence_2" id="cf2_3" value="3"><label for="cf2_3">3</label>
-            <input type="radio" name="confidence_2" id="cf2_4" value="4"><label for="cf2_4">4</label>
-            <input type="radio" name="confidence_2" id="cf2_5" value="5"><label for="cf2_5">5</label>
-            <input type="radio" name="confidence_2" id="cf2_6" value="6"><label for="cf2_6">6</label>
-            <input type="radio" name="confidence_2" id="cf2_7" value="7"><label for="cf2_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-      <div class="survey-question" data-id="confidence_3">
-        <label>다시 선택하더라도 같은 제품을 고를 것이다.</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="confidence_3" id="cf3_1" value="1"><label for="cf3_1">1</label>
-            <input type="radio" name="confidence_3" id="cf3_2" value="2"><label for="cf3_2">2</label>
-            <input type="radio" name="confidence_3" id="cf3_3" value="3"><label for="cf3_3">3</label>
-            <input type="radio" name="confidence_3" id="cf3_4" value="4"><label for="cf3_4">4</label>
-            <input type="radio" name="confidence_3" id="cf3_5" value="5"><label for="cf3_5">5</label>
-            <input type="radio" name="confidence_3" id="cf3_6" value="6"><label for="cf3_6">6</label>
-            <input type="radio" name="confidence_3" id="cf3_7" value="7"><label for="cf3_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 구매 만족도 -->
-    <div class="survey-section">
-      <h3>[4] 구매 만족도</h3>
-      <div class="survey-question" data-id="satisfaction_1">
-        <label>이번 쇼핑 경험에 전반적으로 만족한다.</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="satisfaction_1" id="s1_1" value="1"><label for="s1_1">1</label>
-            <input type="radio" name="satisfaction_1" id="s1_2" value="2"><label for="s1_2">2</label>
-            <input type="radio" name="satisfaction_1" id="s1_3" value="3"><label for="s1_3">3</label>
-            <input type="radio" name="satisfaction_1" id="s1_4" value="4"><label for="s1_4">4</label>
-            <input type="radio" name="satisfaction_1" id="s1_5" value="5"><label for="s1_5">5</label>
-            <input type="radio" name="satisfaction_1" id="s1_6" value="6"><label for="s1_6">6</label>
-            <input type="radio" name="satisfaction_1" id="s1_7" value="7"><label for="s1_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-      <div class="survey-question" data-id="satisfaction_2">
-        <label>선택한 제품의 구매 결정에 만족한다.</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="satisfaction_2" id="s2_1" value="1"><label for="s2_1">1</label>
-            <input type="radio" name="satisfaction_2" id="s2_2" value="2"><label for="s2_2">2</label>
-            <input type="radio" name="satisfaction_2" id="s2_3" value="3"><label for="s2_3">3</label>
-            <input type="radio" name="satisfaction_2" id="s2_4" value="4"><label for="s2_4">4</label>
-            <input type="radio" name="satisfaction_2" id="s2_5" value="5"><label for="s2_5">5</label>
-            <input type="radio" name="satisfaction_2" id="s2_6" value="6"><label for="s2_6">6</label>
-            <input type="radio" name="satisfaction_2" id="s2_7" value="7"><label for="s2_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-      <div class="survey-question" data-id="satisfaction_3">
-        <label>이 쇼핑몰을 다시 이용하고 싶다.</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="satisfaction_3" id="s3_1" value="1"><label for="s3_1">1</label>
-            <input type="radio" name="satisfaction_3" id="s3_2" value="2"><label for="s3_2">2</label>
-            <input type="radio" name="satisfaction_3" id="s3_3" value="3"><label for="s3_3">3</label>
-            <input type="radio" name="satisfaction_3" id="s3_4" value="4"><label for="s3_4">4</label>
-            <input type="radio" name="satisfaction_3" id="s3_5" value="5"><label for="s3_5">5</label>
-            <input type="radio" name="satisfaction_3" id="s3_6" value="6"><label for="s3_6">6</label>
-            <input type="radio" name="satisfaction_3" id="s3_7" value="7"><label for="s3_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="survey-section">
-      <h3>[5] 참가자 정보</h3>
+      <h3>G. 실험 조건 확인</h3>
       <div class="survey-question">
-        <label>이름을 입력해주세요.</label>
-        <input type="text" id="input-name" placeholder="홍길동"
-          style="width:100%; padding:12px 14px; border:1px solid #ddd; border-radius:10px; font-size:0.88rem; background:#f9f9f9;">
+        <label>Q-G1. 이번 실험에서 쇼핑하신 제품은 무엇입니까?</label>
+        <div class="survey-radio-group">
+          <label><input type="radio" name="check_product" value="detergent"> 세탁세제</label>
+          <label><input type="radio" name="check_product" value="notebook"> 노트북</label>
+        </div>
+      </div>
+      <div class="survey-question">
+        <label>Q-G2. AI 도움(추천·챗봇)은 쇼핑의 어느 단계에서 있었습니까?</label>
+        <div class="survey-radio-group" style="flex-direction: column;">
+          <label><input type="radio" name="check_stage" value="explore"> 검색·탐색 단계</label>
+          <label><input type="radio" name="check_stage" value="consider"> 제품 비교·고려 단계</label>
+          <label><input type="radio" name="check_stage" value="purchase"> 결제 직전 단계</label>
+          <label><input type="radio" name="check_stage" value="none"> 없었음</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- H. 실제 구매 여부 -->
+    <div class="survey-section">
+      <h3>H. 실제 구매 여부</h3>
+      <div class="survey-question">
+        <label>Q-H1. 귀하는 이번 쇼핑에서 최종적으로 결제(크레딧 차감)를 하셨습니까?</label>
+        <div class="survey-radio-group">
+          <label><input type="radio" name="check_purchase" value="yes"> 예, 결제했습니다</label>
+          <label><input type="radio" name="check_purchase" value="no"> 아니요, 결제하지 않았습니다</label>
+        </div>
       </div>
     </div>
 
@@ -850,7 +1236,7 @@ const GROUP_CONFIG = {
 let state = {
   pid: '', group: '', product: '', level: 'L0', aiStage: null,
   currentStage: 'S0', selectedProduct: null, purchased: false,
-  chatCount: 0, logs: [], startTime: null,
+  chatCount: 0, logs: [], startTime: null, preSurvey: {},
 };
 
 // ===== PRODUCT DATA =====
@@ -997,10 +1383,45 @@ function startExperiment() {
   state.chatCount = 0;
 
   document.getElementById('landing').style.display = 'none';
-  document.getElementById('instruction-screen').style.display = 'flex';
-  document.getElementById('instruction-body').innerHTML = getInstruction(group);
-  document.getElementById('credit-badge').innerHTML = `💳 보유 크레딧: ${formatPrice(CREDITS[state.product])}`;
+  document.getElementById('stage-pre-survey').style.display = 'block';
+  window.scrollTo(0, 0);
   log('start');
+}
+
+function submitPreSurvey() {
+  const gender = document.querySelector('input[name="pre_gender"]:checked');
+  const age = document.querySelector('input[name="pre_age"]:checked');
+  const name = document.getElementById('input-name').value.trim();
+  const shopFreq = document.querySelector('input[name="pre_shop_freq"]:checked');
+
+  if (!gender) { alert('성별을 선택해주세요.'); return; }
+  if (!age) { alert('연령대를 선택해주세요.'); return; }
+  if (!name) { alert('이름을 입력해주세요.'); document.getElementById('input-name').focus(); return; }
+  if (!shopFreq) { alert('쇼핑 빈도를 선택해주세요.'); return; }
+
+  const aiLitItems = ['ai_lit_1','ai_lit_2','ai_lit_3','ai_lit_4','ai_lit_5','ai_lit_6'];
+  for (const item of aiLitItems) {
+    if (!document.querySelector(`input[name="${item}"]:checked`)) {
+      alert('AI 리터러시 문항에 모두 응답해주세요.');
+      return;
+    }
+  }
+
+  state.pid = name;
+  state.preSurvey = {
+    gender: gender.value,
+    age: age.value,
+    shop_freq: parseInt(shopFreq.value),
+  };
+  aiLitItems.forEach(item => {
+    state.preSurvey[item] = parseInt(document.querySelector(`input[name="${item}"]:checked`).value);
+  });
+
+  document.getElementById('stage-pre-survey').style.display = 'none';
+  document.getElementById('instruction-screen').style.display = 'flex';
+  document.getElementById('instruction-body').innerHTML = getInstruction(state.group);
+  document.getElementById('credit-badge').innerHTML = `💳 보유 크레딧: ${formatPrice(CREDITS[state.product])}`;
+  log('pre_survey_complete', state.preSurvey);
 }
 
 function beginShopping() {
@@ -1267,28 +1688,30 @@ function goSurvey() {
 }
 
 async function submitSurvey() {
+  const postItems = [
+    'mc_1','mc_2','mc_3',
+    'pc_1','pc_2','pc_3','pc_4','pc_5',
+    'dc_1','dc_2','dc_3','dc_4','dc_5',
+    'ps_1','ps_2','ps_3','ps_4','ps_5',
+    'pc_r','dc_r','ps_r',
+    'inv_1','inv_2','inv_3'
+  ];
+  const choiceItems = ['check_product','check_stage','check_purchase'];
+
   const responses = {};
-  document.querySelectorAll('.stage-survey input[type="radio"]:checked').forEach(r => {
-    responses[r.name] = parseInt(r.value);
-  });
-
-  const totalQuestions = 12;
-  const answered = Object.keys(responses).length;
-  if (answered < totalQuestions) {
-    alert(`모든 문항에 응답해주세요. (${answered}/${totalQuestions} 완료)`);
-    return;
+  for (const item of postItems) {
+    const el = document.querySelector(`input[name="${item}"]:checked`);
+    if (!el) { alert(`모든 리커트 문항에 응답해주세요. (${item} 미응답)`); return; }
+    responses[item] = parseInt(el.value);
   }
-
-  const name = document.getElementById('input-name').value.trim();
-  if (!name) {
-    alert('이름을 입력해주세요.');
-    document.getElementById('input-name').focus();
-    return;
+  for (const item of choiceItems) {
+    const el = document.querySelector(`input[name="${item}"]:checked`);
+    if (!el) { alert(`조건 확인 문항에 응답해주세요. (${item} 미응답)`); return; }
+    responses[item] = el.value;
   }
-  state.pid = name;
 
   const result = {
-    pid: name,
+    pid: state.pid,
     group: state.group,
     product: state.product,
     level: state.level,
@@ -1296,7 +1719,8 @@ async function submitSurvey() {
     selectedProduct: state.selectedProduct !== null ? PRODUCTS[state.product][state.selectedProduct].name : null,
     purchased: state.purchased,
     chatCount: state.chatCount,
-    surveyResponses: responses,
+    preSurvey: state.preSurvey,
+    postSurvey: responses,
     logs: state.logs,
     totalTime: Date.now() - state.startTime,
     submittedAt: new Date().toISOString(),
@@ -1311,7 +1735,7 @@ async function submitSurvey() {
 
   await saveToGitHub(result);
 
-  document.querySelectorAll('.survey-section, .btn-submit-survey, .survey-header').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('#stage-survey .survey-section, .btn-submit-survey, #stage-survey .survey-header').forEach(el => el.style.display = 'none');
   document.getElementById('survey-complete').style.display = 'block';
 }
 
@@ -1330,6 +1754,9 @@ async function saveToGitHub(result) {
   const ts = result.submittedAt.replace(/[:.]/g, '-').slice(0, 19);
   const safeName = result.pid.replace(/[^가-힣a-zA-Z0-9]/g, '_');
 
+  const pre = result.preSurvey || {};
+  const post = result.postSurvey || {};
+
   // 1) 개별 Markdown 파일 저장
   const mdFilename = `responses/${ts}_${safeName}_${result.group}.md`;
   const mdContent = `# 실험 결과 — ${result.pid}
@@ -1347,22 +1774,51 @@ async function saveToGitHub(result) {
 | 소요 시간 | ${Math.round(result.totalTime / 1000)}초 |
 | 제출 시각 | ${result.submittedAt} |
 
-## 설문 응답
+## 사전 측정 (PART 0·1)
+
+| 문항 | 응답 |
+|------|------|
+| 성별 | ${pre.gender || ''} |
+| 연령대 | ${pre.age || ''} |
+| 쇼핑빈도 | ${pre.shop_freq || ''} |
+| AI 리터러시 Q1 | ${pre.ai_lit_1 || ''} |
+| AI 리터러시 Q2 | ${pre.ai_lit_2 || ''} |
+| AI 리터러시 Q3 | ${pre.ai_lit_3 || ''} |
+| AI 리터러시 Q4 | ${pre.ai_lit_4 || ''} |
+| AI 리터러시 Q5 | ${pre.ai_lit_5 || ''} |
+| AI 리터러시 Q6 | ${pre.ai_lit_6 || ''} |
+
+## 사후 측정 (PART 2)
 
 | 문항 | 응답 (7점) |
 |------|------|
-| 관여도1 (중요성) | ${result.surveyResponses.involvement_1} |
-| 관여도2 (관련성) | ${result.surveyResponses.involvement_2} |
-| 관여도3 (가치) | ${result.surveyResponses.involvement_3} |
-| 통제감1 | ${result.surveyResponses.control_1} |
-| 통제감2 | ${result.surveyResponses.control_2} |
-| 통제감3 (R) | ${result.surveyResponses.control_3} |
-| 확신1 | ${result.surveyResponses.confidence_1} |
-| 확신2 | ${result.surveyResponses.confidence_2} |
-| 확신3 | ${result.surveyResponses.confidence_3} |
-| 만족도1 | ${result.surveyResponses.satisfaction_1} |
-| 만족도2 | ${result.surveyResponses.satisfaction_2} |
-| 만족도3 | ${result.surveyResponses.satisfaction_3} |
+| MC-1 (L2 인식) | ${post.mc_1 || ''} |
+| MC-2 (L1 인식) | ${post.mc_2 || ''} |
+| MC-3 (L0 인식) | ${post.mc_3 || ''} |
+| PC-1 | ${post.pc_1 || ''} |
+| PC-2 | ${post.pc_2 || ''} |
+| PC-3 | ${post.pc_3 || ''} |
+| PC-4 | ${post.pc_4 || ''} |
+| PC-5 | ${post.pc_5 || ''} |
+| DC-1 | ${post.dc_1 || ''} |
+| DC-2 | ${post.dc_2 || ''} |
+| DC-3 | ${post.dc_3 || ''} |
+| DC-4 | ${post.dc_4 || ''} |
+| DC-5 | ${post.dc_5 || ''} |
+| PS-1 | ${post.ps_1 || ''} |
+| PS-2 | ${post.ps_2 || ''} |
+| PS-3 | ${post.ps_3 || ''} |
+| PS-4 | ${post.ps_4 || ''} |
+| PS-5 | ${post.ps_5 || ''} |
+| PC-R (역채점) | ${post.pc_r || ''} |
+| DC-R (역채점) | ${post.dc_r || ''} |
+| PS-R (역채점) | ${post.ps_r || ''} |
+| INV-1 (관여도) | ${post.inv_1 || ''} |
+| INV-2 (관여도) | ${post.inv_2 || ''} |
+| INV-3 (관여도) | ${post.inv_3 || ''} |
+| 조건확인-제품 | ${post.check_product || ''} |
+| 조건확인-단계 | ${post.check_stage || ''} |
+| 구매확인 | ${post.check_purchase || ''} |
 
 ## Raw JSON
 
@@ -1381,7 +1837,7 @@ ${JSON.stringify(result, null, 2)}
 
   // 2) CSV 누적 저장
   const CSV_PATH = 'data/results.csv';
-  const CSV_HEADER = 'timestamp,name,group,product,level,ai_stage,selected_product,purchased,chat_count,duration_sec,involvement_1,involvement_2,involvement_3,control_1,control_2,control_3,confidence_1,confidence_2,confidence_3,satisfaction_1,satisfaction_2,satisfaction_3';
+  const CSV_HEADER = 'timestamp,name,group,product,level,ai_stage,selected_product,purchased,chat_count,duration_sec,gender,age,shop_freq,ai_lit_1,ai_lit_2,ai_lit_3,ai_lit_4,ai_lit_5,ai_lit_6,mc_1,mc_2,mc_3,pc_1,pc_2,pc_3,pc_4,pc_5,dc_1,dc_2,dc_3,dc_4,dc_5,ps_1,ps_2,ps_3,ps_4,ps_5,pc_r,dc_r,ps_r,inv_1,inv_2,inv_3,check_product,check_stage,check_purchase';
   const csvRow = [
     result.submittedAt,
     result.pid,
@@ -1393,18 +1849,42 @@ ${JSON.stringify(result, null, 2)}
     result.purchased,
     result.chatCount,
     Math.round(result.totalTime / 1000),
-    result.surveyResponses.involvement_1,
-    result.surveyResponses.involvement_2,
-    result.surveyResponses.involvement_3,
-    result.surveyResponses.control_1,
-    result.surveyResponses.control_2,
-    result.surveyResponses.control_3,
-    result.surveyResponses.confidence_1,
-    result.surveyResponses.confidence_2,
-    result.surveyResponses.confidence_3,
-    result.surveyResponses.satisfaction_1,
-    result.surveyResponses.satisfaction_2,
-    result.surveyResponses.satisfaction_3,
+    pre.gender || '',
+    pre.age || '',
+    pre.shop_freq || '',
+    pre.ai_lit_1 || '',
+    pre.ai_lit_2 || '',
+    pre.ai_lit_3 || '',
+    pre.ai_lit_4 || '',
+    pre.ai_lit_5 || '',
+    pre.ai_lit_6 || '',
+    post.mc_1 || '',
+    post.mc_2 || '',
+    post.mc_3 || '',
+    post.pc_1 || '',
+    post.pc_2 || '',
+    post.pc_3 || '',
+    post.pc_4 || '',
+    post.pc_5 || '',
+    post.dc_1 || '',
+    post.dc_2 || '',
+    post.dc_3 || '',
+    post.dc_4 || '',
+    post.dc_5 || '',
+    post.ps_1 || '',
+    post.ps_2 || '',
+    post.ps_3 || '',
+    post.ps_4 || '',
+    post.ps_5 || '',
+    post.pc_r || '',
+    post.dc_r || '',
+    post.ps_r || '',
+    post.inv_1 || '',
+    post.inv_2 || '',
+    post.inv_3 || '',
+    post.check_product || '',
+    post.check_stage || '',
+    post.check_purchase || '',
   ].join(',');
 
   try {

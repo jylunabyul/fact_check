@@ -237,6 +237,15 @@ body {
       </div>
     </div>
 
+    <div class="config-section">
+      <h3>프리셋</h3>
+      <div class="speed-control">
+        <button class="speed-btn" onclick="applyPreset('natural')">자연스러운 결과</button>
+        <button class="speed-btn" onclick="applyPreset('strong')">강한 효과</button>
+        <button class="speed-btn" onclick="applyPreset('conservative')">보수적</button>
+      </div>
+    </div>
+
     <div class="config-section" style="border-bottom: none;">
       <h3>실행 속도</h3>
       <div class="speed-control">
@@ -929,6 +938,26 @@ function betaCF(x,a,b) { let d=1-(a+b)*x/(a+1); if(Math.abs(d)<1e-30)d=1e-30; d=
 function lnGamma(z) { const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.001208650973866179,-0.000005395239384953]; let x=z,y=z,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015; for(let j=0;j<6;j++)ser+=c[j]/++y;return-tmp+Math.log(2.5066282746310005*ser/x); }
 function formatP(p) { return p < 0.001 ? '< .001' : p.toFixed(3); }
 function stars(p) { return p < 0.001 ? '***' : p < 0.01 ? '**' : p < 0.05 ? '*' : '비유의'; }
+
+function applyPreset(name) {
+  const presets = {
+    natural:      { level: 0.55, stage: 0.35, inter: 0.10, prod: 0.30, noise: 1.4 },
+    strong:       { level: 0.75, stage: 0.50, inter: 0.15, prod: 0.45, noise: 1.1 },
+    conservative: { level: 0.35, stage: 0.25, inter: 0.10, prod: 0.20, noise: 1.6 },
+  };
+  const p = presets[name];
+  if (!p) return;
+  document.getElementById('effect-level').value = p.level;
+  document.getElementById('effect-level-val').textContent = p.level.toFixed(2);
+  document.getElementById('effect-stage').value = p.stage;
+  document.getElementById('effect-stage-val').textContent = p.stage.toFixed(2);
+  document.getElementById('effect-inter').value = p.inter;
+  document.getElementById('effect-inter-val').textContent = p.inter.toFixed(2);
+  document.getElementById('effect-prod').value = p.prod;
+  document.getElementById('effect-prod-val').textContent = p.prod.toFixed(2);
+  document.getElementById('noise').value = p.noise;
+  document.getElementById('noise-val').textContent = p.noise.toFixed(1);
+}
 
 function setSpeed(ms) {
   simSpeed = ms;

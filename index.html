@@ -497,22 +497,6 @@ body {
           <span class="scale-label">매우 그렇다</span>
         </div>
       </div>
-      <div class="survey-question" data-id="ai_lit_3">
-        <label>Q3. 나는 AI가 어떤 방식으로 작동하는지 기본적으로 이해하고 있다</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="ai_lit_3" id="al3_1" value="1"><label for="al3_1">1</label>
-            <input type="radio" name="ai_lit_3" id="al3_2" value="2"><label for="al3_2">2</label>
-            <input type="radio" name="ai_lit_3" id="al3_3" value="3"><label for="al3_3">3</label>
-            <input type="radio" name="ai_lit_3" id="al3_4" value="4"><label for="al3_4">4</label>
-            <input type="radio" name="ai_lit_3" id="al3_5" value="5"><label for="al3_5">5</label>
-            <input type="radio" name="ai_lit_3" id="al3_6" value="6"><label for="al3_6">6</label>
-            <input type="radio" name="ai_lit_3" id="al3_7" value="7"><label for="al3_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
       <div class="survey-question" data-id="ai_lit_4">
         <label>Q4. 나는 AI 사용 시 개인정보 보호 문제를 인식하고 있다</label>
         <div class="likert-scale">
@@ -525,22 +509,6 @@ body {
             <input type="radio" name="ai_lit_4" id="al4_5" value="5"><label for="al4_5">5</label>
             <input type="radio" name="ai_lit_4" id="al4_6" value="6"><label for="al4_6">6</label>
             <input type="radio" name="ai_lit_4" id="al4_7" value="7"><label for="al4_7">7</label>
-          </div>
-          <span class="scale-label">매우 그렇다</span>
-        </div>
-      </div>
-      <div class="survey-question" data-id="ai_lit_5">
-        <label>Q5. 나는 AI 추천 시스템이 어떻게 작동하는지 이해하고 있다</label>
-        <div class="likert-scale">
-          <span class="scale-label">전혀 아니다</span>
-          <div class="likert-options">
-            <input type="radio" name="ai_lit_5" id="al5_1" value="1"><label for="al5_1">1</label>
-            <input type="radio" name="ai_lit_5" id="al5_2" value="2"><label for="al5_2">2</label>
-            <input type="radio" name="ai_lit_5" id="al5_3" value="3"><label for="al5_3">3</label>
-            <input type="radio" name="ai_lit_5" id="al5_4" value="4"><label for="al5_4">4</label>
-            <input type="radio" name="ai_lit_5" id="al5_5" value="5"><label for="al5_5">5</label>
-            <input type="radio" name="ai_lit_5" id="al5_6" value="6"><label for="al5_6">6</label>
-            <input type="radio" name="ai_lit_5" id="al5_7" value="7"><label for="al5_7">7</label>
           </div>
           <span class="scale-label">매우 그렇다</span>
         </div>
@@ -1399,7 +1367,7 @@ function submitPreSurvey() {
   if (!name) { alert('이름을 입력해주세요.'); document.getElementById('input-name').focus(); return; }
   if (!shopFreq) { alert('쇼핑 빈도를 선택해주세요.'); return; }
 
-  const aiLitItems = ['ai_lit_1','ai_lit_2','ai_lit_3','ai_lit_4','ai_lit_5','ai_lit_6'];
+  const aiLitItems = ['ai_lit_1','ai_lit_2','ai_lit_4','ai_lit_6'];
   for (const item of aiLitItems) {
     if (!document.querySelector(`input[name="${item}"]:checked`)) {
       alert('AI 리터러시 문항에 모두 응답해주세요.');
@@ -1407,11 +1375,18 @@ function submitPreSurvey() {
     }
   }
 
+  const aiLit1Val = parseInt(document.querySelector('input[name="ai_lit_1"]:checked').value);
+  const shopFreqVal = parseInt(shopFreq.value);
+  if (aiLit1Val === 1 || shopFreqVal === 1) {
+    document.getElementById('stage-pre-survey').innerHTML = '<div style="text-align:center; padding:80px 20px;"><h2 style="color:#e74c3c;">이 설문에 충족하지 않습니다.</h2><p style="margin-top:16px; font-size:1.1rem;">다음에 다시 참여해 주세요.</p></div>';
+    return;
+  }
+
   state.pid = name;
   state.preSurvey = {
     gender: gender.value,
     age: age.value,
-    shop_freq: parseInt(shopFreq.value),
+    shop_freq: shopFreqVal,
   };
   aiLitItems.forEach(item => {
     state.preSurvey[item] = parseInt(document.querySelector(`input[name="${item}"]:checked`).value);
@@ -1783,9 +1758,7 @@ async function saveToGitHub(result) {
 | 쇼핑빈도 | ${pre.shop_freq || ''} |
 | AI 리터러시 Q1 | ${pre.ai_lit_1 || ''} |
 | AI 리터러시 Q2 | ${pre.ai_lit_2 || ''} |
-| AI 리터러시 Q3 | ${pre.ai_lit_3 || ''} |
 | AI 리터러시 Q4 | ${pre.ai_lit_4 || ''} |
-| AI 리터러시 Q5 | ${pre.ai_lit_5 || ''} |
 | AI 리터러시 Q6 | ${pre.ai_lit_6 || ''} |
 
 ## 사후 측정 (PART 2)
@@ -1837,7 +1810,7 @@ ${JSON.stringify(result, null, 2)}
 
   // 2) CSV 누적 저장
   const CSV_PATH = 'data/results.csv';
-  const CSV_HEADER = 'timestamp,name,group,product,level,ai_stage,selected_product,purchased,chat_count,duration_sec,gender,age,shop_freq,ai_lit_1,ai_lit_2,ai_lit_3,ai_lit_4,ai_lit_5,ai_lit_6,mc_1,mc_2,mc_3,pc_1,pc_2,pc_3,pc_4,pc_5,dc_1,dc_2,dc_3,dc_4,dc_5,ps_1,ps_2,ps_3,ps_4,ps_5,pc_r,dc_r,ps_r,inv_1,inv_2,inv_3,check_product,check_stage,check_purchase';
+  const CSV_HEADER = 'timestamp,name,group,product,level,ai_stage,selected_product,purchased,chat_count,duration_sec,gender,age,shop_freq,ai_lit_1,ai_lit_2,ai_lit_4,ai_lit_6,mc_1,mc_2,mc_3,pc_1,pc_2,pc_3,pc_4,pc_5,dc_1,dc_2,dc_3,dc_4,dc_5,ps_1,ps_2,ps_3,ps_4,ps_5,pc_r,dc_r,ps_r,inv_1,inv_2,inv_3,check_product,check_stage,check_purchase';
   const csvRow = [
     result.submittedAt,
     result.pid,
@@ -1854,9 +1827,7 @@ ${JSON.stringify(result, null, 2)}
     pre.shop_freq || '',
     pre.ai_lit_1 || '',
     pre.ai_lit_2 || '',
-    pre.ai_lit_3 || '',
     pre.ai_lit_4 || '',
-    pre.ai_lit_5 || '',
     pre.ai_lit_6 || '',
     post.mc_1 || '',
     post.mc_2 || '',

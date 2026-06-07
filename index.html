@@ -1243,13 +1243,13 @@ let state = {
 const CREDITS = { detergent: 20000, notebook: 2000000 };
 
 const PRODUCTS = {
-  shampoo: [
-    { id: 'A', brand: '케라시스', name: '케라시스 퍼퓸 샴푸 600ml', price: 8900, rating: 4.7, reviews: 15200, emoji: '🧴', features: '향기 지속, 손상모 케어, 실리콘프리', reviewText: '"향이 하루종일 가요", "머릿결 부드러워짐", "가성비 좋아요"' },
-    { id: 'B', brand: '아모스', name: '아모스 녹차실감 샴푸 500ml', price: 12500, rating: 4.6, reviews: 9800, emoji: '🧴', features: '두피 진정, 녹차 추출물, 약산성', reviewText: '"두피 가려움 줄었어요", "시원한 느낌", "거품 풍부"' },
-    { id: 'C', brand: '다슈', name: '다슈 데일리 스칼프 샴푸 500ml', price: 14200, rating: 4.8, reviews: 21000, emoji: '🧴', features: '탈모 예방, 두피 강화, 비오틴 함유', reviewText: '"머리 빠지는 게 줄었어요", "두피 개운함", "남녀 모두 좋아요"' },
-    { id: 'D', brand: '닥터방기원', name: '닥터방기원 탈모샴푸 500ml', price: 15800, rating: 4.5, reviews: 11200, emoji: '🧴', features: '탈모증상 완화, 식약처 인증, 한방 성분', reviewText: '"효과 있는 것 같아요", "향이 괜찮아요", "거품 적당함"' },
-    { id: 'E', brand: '라보에이치', name: '라보에이치 두피강화 샴푸 400ml', price: 18500, rating: 4.9, reviews: 7600, emoji: '🧴', features: '프로바이오틱스, 약산성, 민감두피용', reviewText: '"민감한 두피에 자극 없어요", "순하고 좋아요", "비싸지만 가치있음"' },
-    { id: 'F', brand: '려', name: '려 자양윤모 샴푸 820ml', price: 11900, rating: 4.6, reviews: 18400, emoji: '🧴', features: '대용량, 인삼 성분, 윤기 부여', reviewText: '"대용량 가성비 좋아요", "머릿결 윤기나요", "한방향 좋아요"' },
+  detergent: [
+    { id: 'A', brand: '퍼실', name: '퍼실 파워젤 드럼용 2.7L', price: 18900, rating: 4.8, reviews: 22100, emoji: '🧺', features: '강력 세정, 드럼 전용, 섬유 보호', reviewText: '"때 잘 빠져요", "향이 은은해요", "드럼세탁기에 딱"' },
+    { id: 'B', brand: '피죤', name: '피죤 리치퍼퓸 세탁세제 2.0L', price: 12900, rating: 4.6, reviews: 18500, emoji: '🧺', features: '고농축, 향기 지속, 섬유유연 효과', reviewText: '"향이 오래가요", "소량만 넣어도 돼요", "빨래 부드러워짐"' },
+    { id: 'C', brand: '액츠', name: '액츠 퍼펙트 안티박 2.2L', price: 15800, rating: 4.7, reviews: 14200, emoji: '🧺', features: '99.9% 항균, 냄새 제거, 찬물 세탁 OK', reviewText: '"빨래 냄새 확 줄었어요", "찬물에도 잘 녹아요", "항균 효과 좋아요"' },
+    { id: 'D', brand: '테크', name: '테크 베이킹소다 2.0L', price: 11500, rating: 4.5, reviews: 9800, emoji: '🧺', features: '자연유래 성분, 민감 피부, 저자극', reviewText: '"피부 예민한데 자극 없어요", "가성비 좋아요", "향이 순해요"' },
+    { id: 'E', brand: '불스원', name: '불스원 세탁조클리너 포함 세트 2.5L', price: 19800, rating: 4.9, reviews: 7300, emoji: '🧺', features: '세탁조 클리닝 동시, 올인원, 대용량', reviewText: '"세탁조 청소까지 돼서 편해요", "가격 대비 만족", "통돌이에도 좋아요"' },
+    { id: 'F', brand: '스파크', name: '스파크 파워드럼 액체세제 2.5L', price: 14200, rating: 4.6, reviews: 16700, emoji: '🧺', features: '거품 적음, 세정력 강함, 드럼/통돌이 겸용', reviewText: '"드럼이든 통돌이든 OK", "찌든 때도 잘 빠져요", "양 많아서 오래 써요"' },
   ],
   notebook: [
     { id: 'A', brand: 'LG', name: 'LG 그램 16 (i5/16GB/512GB)', price: 1490000, rating: 4.8, reviews: 8200, emoji: '💻', features: '무게 1.19kg, 배터리 최대 22시간, 16인치 IPS', reviewText: '"가볍고 배터리 오래가요", "화면 선명함", "발열 적음"' },
@@ -1263,19 +1263,19 @@ const PRODUCTS = {
 
 // ===== AI 추천 메시지 + 선택지 =====
 const AI_PROACTIVE_MSG = {
-  shampoo: {
+  detergent: {
     S0: {
-      message: '샴푸를 찾고 계시는군요! 어떤 두피/모발 고민이 있으세요?',
+      message: '세탁세제를 찾고 계시는군요! 어떤 세탁 고민이 있으세요?',
       choices: [
-        { label: '① 탈모/두피 케어', response: '두피 케어 제품으로 다슈 데일리 스칼프 샴푸(14,200원)와 닥터방기원 탈모샴푸(15,800원)를 추천드려요. 민감 두피라면 라보에이치(18,500원)도 좋아요.' },
-        { label: '② 향기/손상모 케어', response: '향기와 손상모 케어에는 케라시스 퍼퓸 샴푸(8,900원)가 인기 많아요. 윤기를 원하시면 려 자양윤모(11,900원)도 추천드려요.' },
+        { label: '① 강력 세정/찌든 때', response: '강력 세정이 필요하시면 퍼실 파워젤(18,900원)이 인기 많아요. 항균까지 원하시면 액츠 퍼펙트 안티박(15,800원)도 추천드려요.' },
+        { label: '② 향기/섬유유연', response: '향기가 오래가는 제품으로 피죤 리치퍼퓸(12,900원)을 추천드려요. 섬유유연 효과까지 있어서 따로 유연제를 안 넣어도 돼요.' },
         { label: '③ 직접 탐색할게요', response: null },
       ],
     },
     S1: {
       message: '지금 보고 계신 제품과 비슷한 가격대의 다른 제품들을 비교해드릴까요?',
       choices: [
-        { label: '① 네, 비교해주세요', response: '비교해드릴게요. 아모스 녹차실감(12,500원)은 두피 진정에 특화되어 있고, 다슈 스칼프(14,200원)는 탈모 예방 기능이 강점이에요. 두피 고민이 크시면 다슈, 자극 없는 제품을 원하시면 아모스를 추천해요.' },
+        { label: '① 네, 비교해주세요', response: '비교해드릴게요. 액츠 안티박(15,800원)은 항균력이 강점이고, 스파크 파워드럼(14,200원)은 드럼/통돌이 겸용이라 범용성이 좋아요. 냄새 제거가 중요하면 액츠, 가성비를 원하시면 스파크를 추천해요.' },
         { label: '② 괜찮아요, 직접 볼게요', response: null },
       ],
     },

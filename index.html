@@ -561,13 +561,14 @@ body {
 </div>
 
 <!-- Participant Badge -->
-<div class="participant-badge" id="participant-badge">
-  <div class="pb-title" onclick="toggleBadge()" style="cursor:pointer; user-select:none;">실험 정보 <span id="pb-toggle">▼</span></div>
+<div class="participant-badge" id="participant-badge" onclick="toggleBadge()" style="cursor:pointer;">
   <div id="pb-content">
+    <div class="pb-title" style="user-select:none;">실험 정보</div>
     <div class="pb-row">그룹: <span id="pb-group">—</span></div>
     <div class="pb-row">제품: <span id="pb-product">—</span></div>
     <div class="pb-row">AI: <span id="pb-ai">—</span></div>
   </div>
+  <div id="pb-collapsed" style="display:none; font-size:0.7rem; color:#764ba2; font-weight:700;">◀</div>
 </div>
 
 <!-- Progress -->
@@ -1403,13 +1404,16 @@ function submitPreSurvey() {
 
 function toggleBadge() {
   const content = document.getElementById('pb-content');
-  const toggle = document.getElementById('pb-toggle');
+  const collapsed = document.getElementById('pb-collapsed');
+  const badge = document.getElementById('participant-badge');
   if (content.style.display === 'none') {
     content.style.display = 'block';
-    toggle.textContent = '▼';
+    collapsed.style.display = 'none';
+    badge.style.padding = '10px 14px';
   } else {
     content.style.display = 'none';
-    toggle.textContent = '▶';
+    collapsed.style.display = 'block';
+    badge.style.padding = '8px 10px';
   }
 }
 

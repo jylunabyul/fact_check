@@ -562,10 +562,12 @@ body {
 
 <!-- Participant Badge -->
 <div class="participant-badge" id="participant-badge">
-  <div class="pb-title">실험 정보</div>
-  <div class="pb-row">그룹: <span id="pb-group">—</span></div>
-  <div class="pb-row">제품: <span id="pb-product">—</span></div>
-  <div class="pb-row">AI: <span id="pb-ai">—</span></div>
+  <div class="pb-title" onclick="toggleBadge()" style="cursor:pointer; user-select:none;">실험 정보 <span id="pb-toggle">▼</span></div>
+  <div id="pb-content">
+    <div class="pb-row">그룹: <span id="pb-group">—</span></div>
+    <div class="pb-row">제품: <span id="pb-product">—</span></div>
+    <div class="pb-row">AI: <span id="pb-ai">—</span></div>
+  </div>
 </div>
 
 <!-- Progress -->
@@ -1397,6 +1399,18 @@ function submitPreSurvey() {
   document.getElementById('instruction-body').innerHTML = getInstruction(state.group);
   document.getElementById('credit-badge').innerHTML = `💳 보유 크레딧: ${formatPrice(CREDITS[state.product])}`;
   log('pre_survey_complete', state.preSurvey);
+}
+
+function toggleBadge() {
+  const content = document.getElementById('pb-content');
+  const toggle = document.getElementById('pb-toggle');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    toggle.textContent = '▼';
+  } else {
+    content.style.display = 'none';
+    toggle.textContent = '▶';
+  }
 }
 
 function beginShopping() {
